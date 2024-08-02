@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 #include "../ecs/components.h"
-#include "../../../../../syncmax-plugin/include/shared_data.h" // Plugin decides data layout
+#include "../../../../../maya-bridge/include/shared_data.h" // Plugin decides data layout
 
 struct EntityHandle
 {
@@ -24,7 +24,7 @@ struct Mayalink
 	{
 		m_isSynced = false;
 
-		if (m_buffer.init("MayaToMax", sizeof(SharedData)))
+		if (m_buffer.init("maya-bridge", sizeof(SharedData)))
 		{
 			m_shared = BX_NEW(bgfx::getAllocator(), SharedData);
 			m_shared->m_processed = false;
@@ -120,9 +120,8 @@ struct Mayalink
 				};
 				bgfx::addComponent<TransformComponent>(entity, bgfx::createComponent<TransformComponent>(tc));
 
-				// @todo How much extra memory should I allocate for these dynamic buffers? 256 enough?
-				const bgfx::Memory* vertices = bgfx::copy(meshEvent.m_vertices, layout.getSize(meshEvent.m_numVertices) + 256);
-				const bgfx::Memory* indices = bgfx::copy(meshEvent.m_indices, meshEvent.m_numIndices * sizeof(uint16_t) + 256);
+				const bgfx::Memory* vertices = bgfx::copy(meshEvent.m_vertices, layout.getSize(meshEvent.m_numVertices));
+				const bgfx::Memory* indices = bgfx::copy(meshEvent.m_indices, meshEvent.m_numIndices * sizeof(uint16_t));
 
 				bgfx::MaterialHandle whiteMaterial = bgfx::createMaterial(bgfx::loadProgram("vs_cube", "fs_cube"));
 				float white[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
