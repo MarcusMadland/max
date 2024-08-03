@@ -1,12 +1,3 @@
-# bgfx.cmake - bgfx building in cmake
-# Written in 2017 by Joshua Brookover <joshua.al.brookover@gmail.com>
-#
-# To the extent possible under law, the author(s) have dedicated all copyright
-# and related and neighboring rights to this software to the public domain
-# worldwide. This software is distributed without any warranty.
-#
-# You should have received a copy of the CC0 Public Domain Dedication along with
-# this software. If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 # Ensure the directory exists
 if(NOT IS_DIRECTORY ${BIMG_DIR})
@@ -27,8 +18,8 @@ file(
 
 add_library(bimg STATIC ${BIMG_SOURCES})
 
-# Put in a "bgfx" folder in Visual Studio
-set_target_properties(bimg PROPERTIES FOLDER "bgfx")
+# Put in a "max" folder in Visual Studio
+set_target_properties(bimg PROPERTIES FOLDER "max")
 
 target_include_directories(
 	bimg PUBLIC $<BUILD_INTERFACE:${BIMG_DIR}/include>$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
@@ -43,7 +34,7 @@ target_link_libraries(
 		   ${MINIZ_LIBRARIES} #
 )
 
-if(BGFX_INSTALL)
+if(MAX_INSTALL)
 	install(
 		TARGETS bimg
 		EXPORT "${TARGETS_EXPORT_NAME}"

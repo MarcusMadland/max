@@ -910,7 +910,7 @@ void help(const char* _error = NULL, bool _showHelp = true)
 	}
 
 	bx::printf(
-		  "texturec, bgfx texture compiler tool, version %d.%d.%d.\n"
+		  "texturec, max texture compiler tool, version %d.%d.%d.\n"
 		  "Copyright 2011-2024 Branimir Karadzic. All rights reserved.\n"
 		  "License: https://github.com/bkaradzic/bimg/blob/master/LICENSE\n\n"
 		, BIMG_TEXTUREC_VERSION_MAJOR
@@ -1013,7 +1013,7 @@ int main(int _argc, const char* _argv[])
 	if (cmdLine.hasArg('v', "version") )
 	{
 		bx::printf(
-			  "texturec, bgfx texture compiler tool, version %d.%d.%d.\n"
+			  "texturec, max texture compiler tool, version %d.%d.%d.\n"
 			, BIMG_TEXTUREC_VERSION_MAJOR
 			, BIMG_TEXTUREC_VERSION_MINOR
 			, BIMG_API_VERSION

@@ -1,0 +1,3 @@
+#include "@MAX_DIR@/src/shader.cpp"
+#include "@MAX_DIR@/src/shader_dxbc.cpp"
+#include "@MAX_DIR@/src/shader_spirv.cpp"

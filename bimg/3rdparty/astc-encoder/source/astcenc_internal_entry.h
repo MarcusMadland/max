@@ -23,8 +23,8 @@
  * majority of the codec library does not include this.
  */
 
-#ifndef ASTCENC_INTERNAL_BGFX_INCLUDED
-#define ASTCENC_INTERNAL_BGFX_INCLUDED
+#ifndef ASTCENC_INTERNAL_MAX_INCLUDED
+#define ASTCENC_INTERNAL_MAX_INCLUDED
 
 #include <atomic>
 #include <condition_variable>

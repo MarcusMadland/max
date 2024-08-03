@@ -41,7 +41,7 @@ namespace bimg
 	///
 	/// @attention Availability depends on Caps (see: formats).
 	///
-	/// @attention C99 equivalent is `bgfx_texture_format_t`.
+	/// @attention C99 equivalent is `max_texture_format_t`.
 	///
 	struct TextureFormat
 	{
@@ -172,7 +172,7 @@ namespace bimg
 
 	/// Texture info.
 	///
-	/// @attention C99 equivalent is `bgfx_texture_info_t`.
+	/// @attention C99 equivalent is `max_texture_info_t`.
 	///
 	struct TextureInfo
 	{

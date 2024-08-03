@@ -7,7 +7,7 @@ target_include_directories(
 	mink PUBLIC $<BUILD_INTERFACE:${MINK_DIR}/include>$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-if(BGFX_INSTALL)
+if(MAX_INSTALL)
 	install(
 		TARGETS mink
 		EXPORT "${TARGETS_EXPORT_NAME}"
@@ -20,4 +20,4 @@ if(BGFX_INSTALL)
 	install(DIRECTORY ${MINK_DIR}/include/mink DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 endif()
 
-set_target_properties(mink PROPERTIES FOLDER "bgfx")
+set_target_properties(mink PROPERTIES FOLDER "max")
