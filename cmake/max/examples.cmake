@@ -265,7 +265,7 @@ if(MAX_BUILD_EXAMPLES)
 	# Add examples
 	set(MAX_EXAMPLES
 		00-helloworld
-		01-test
+		01-mayabridge
 	)
 
 	foreach(EXAMPLE ${MAX_EXAMPLES})

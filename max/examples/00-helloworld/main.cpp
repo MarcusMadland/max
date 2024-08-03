@@ -200,8 +200,9 @@ public:
 				{
 					RenderComponent* rc = max::getComponent<RenderComponent>(_entity);
 					TransformComponent* tc = max::getComponent<TransformComponent>(_entity);
-					
+
 					max::MeshQuery* query = max::queryMesh(rc->m_mesh);
+
 					for (uint32_t ii = 0; ii < query->m_num; ++ii)
 					{
 						float mtx[16];
@@ -209,12 +210,26 @@ public:
 							tc->m_scale.x, tc->m_scale.y, tc->m_scale.z,
 							tc->m_rotation.x, tc->m_rotation.y, tc->m_rotation.z, tc->m_rotation.w,
 							tc->m_position.x, tc->m_position.y, tc->m_position.z);
+
 						max::setTransform(mtx);
 
-						max::VertexBufferHandle vbh = { query->m_handleData[ii].m_vertexHandleIdx };
-						max::IndexBufferHandle ibh = { query->m_handleData[ii].m_indexHandleIdx };
-						max::setVertexBuffer(0, vbh);
-						max::setIndexBuffer(ibh);
+						max::MeshQuery::HandleData& handleData = query->m_handleData[ii];
+						if (handleData.m_dynamic)
+						{
+							max::DynamicVertexBufferHandle dvbh = { handleData.m_vertexHandleIdx };
+							max::setVertexBuffer(0, dvbh);
+
+							max::DynamicIndexBufferHandle dibh = { handleData.m_indexHandleIdx };
+							max::setIndexBuffer(dibh);
+						}
+						else
+						{
+							max::VertexBufferHandle vbh = { handleData.m_vertexHandleIdx };
+							max::setVertexBuffer(0, vbh);
+
+							max::IndexBufferHandle ibh = { handleData.m_indexHandleIdx };
+							max::setIndexBuffer(ibh);
+						}
 
 						max::setMaterial(rc->m_material);
 						max::setState(0
