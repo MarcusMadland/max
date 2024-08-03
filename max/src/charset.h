@@ -1,6 +1,6 @@
 /*
- * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/max/blob/master/LICENSE
+ * Copyright 2024 Marcus Madland. All rights reserved.
+ * License: https://github.com/marcusmadland/max/blob/main/LICENSE
  */
 
 static const uint8_t vga8x8[256*8] =

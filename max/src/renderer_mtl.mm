@@ -1,6 +1,6 @@
 /*
  * Copyright 2011-2016 Attila Kocsis. All rights reserved.
- * License: https://github.com/bkaradzic/max/blob/master/LICENSE
+ * License: https://github.com/marcusmadland/max/blob/mainICENSE
  */
 
 #include "max_p.h"

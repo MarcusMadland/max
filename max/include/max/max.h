@@ -1,6 +1,6 @@
 /*
- * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/max/blob/master/LICENSE
+ * Copyright 2024 Marcus Madland. All rights reserved.
+ * License: https://github.com/marcusmadland/max/blob/main/LICENSE
  */
 
 #ifndef MAX_H_HEADER_GUARD
@@ -385,8 +385,6 @@ namespace max
 
 	/// Uniform type enum.
 	///
-	/// @attention C99's equivalent binding is `max_uniform_type_t`.
-	///
 	struct UniformType
 	{
 		/// Uniform types:
@@ -404,8 +402,6 @@ namespace max
 	};
 
 	/// Backbuffer ratio enum.
-	///
-	/// @attention C99's equivalent binding is `max_backbuffer_ratio_t`.
 	///
 	struct BackbufferRatio
 	{
@@ -425,8 +421,6 @@ namespace max
 
 	/// Occlusion query result.
 	///
-	/// @attention C99's equivalent binding is `max_occlusion_query_result_t`.
-	///
 	struct OcclusionQueryResult
 	{
 		/// Occlusion query results:
@@ -441,8 +435,6 @@ namespace max
 	};
 
 	/// Primitive topology.
-	///
-	/// @attention C99's equivalent binding is `max_topology_t`.
 	///
 	struct Topology
 	{
@@ -461,8 +453,6 @@ namespace max
 
 	/// Topology conversion function.
 	///
-	/// @attention C99's equivalent binding is `max_topology_convert_t`.
-	///
 	struct TopologyConvert
 	{
 		/// Topology conversion functions:
@@ -479,8 +469,6 @@ namespace max
 	};
 
 	/// Topology sort order.
-	///
-	/// @attention C99's equivalent binding is `max_topology_sort_t`.
 	///
 	struct TopologySort
 	{
@@ -506,8 +494,6 @@ namespace max
 
 	/// View mode sets draw call sort order.
 	///
-	/// @attention C99's equivalent binding is `max_view_mode_t`.
-	///
 	struct ViewMode
 	{
 		/// View modes:
@@ -523,8 +509,6 @@ namespace max
 	};
 
 	/// Native window handle type.
-	///
-	/// @attention C99's equivalent binding is `max_native_window_handle_type_t`.
 	///
 	struct NativeWindowHandleType
 	{
@@ -786,8 +770,6 @@ namespace max
 	///   'fatal' and 'trace' callbacks can be called from any thread. Other
 	///   callbacks are called from the render thread.
 	///
-	/// @attention C99's equivalent binding is `max_callback_interface_t`.
-	///
 	struct CallbackI
 	{
 		virtual ~CallbackI() = 0;
@@ -803,8 +785,6 @@ namespace max
 		///
 		/// @remarks
 		///   Not thread safe and it can be called from any thread.
-		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.fatal`.
 		///
 		virtual void fatal(
 			  const char* _filePath
@@ -824,8 +804,6 @@ namespace max
 		/// @remarks
 		///   Not thread safe and it can be called from any thread.
 		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.trace_vargs`.
-		///
 		virtual void traceVargs(
 			  const char* _filePath
 			, uint16_t _line
@@ -842,8 +820,6 @@ namespace max
 		///
 		/// @remarks
 		///   Not thread safe and it can be called from any thread.
-		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.profiler_begin`.
 		///
 		virtual void profilerBegin(
 			  const char* _name
@@ -862,8 +838,6 @@ namespace max
 		/// @remarks
 		///   Not thread safe and it can be called from any thread.
 		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.profiler_begin_literal`.
-		///
 		virtual void profilerBeginLiteral(
 			  const char* _name
 			, uint32_t _abgr
@@ -876,8 +850,6 @@ namespace max
 		/// @remarks
 		///   Not thread safe and it can be called from any thread.
 		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.profiler_end`.
-		///
 		virtual void profilerEnd() = 0;
 
 		/// Returns the size of a cached item. Returns 0 if no cached item was
@@ -885,8 +857,6 @@ namespace max
 		///
 		/// @param[in] _id Cache id.
 		/// @returns Number of bytes to read.
-		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.cache_read_size`.
 		///
 		virtual uint32_t cacheReadSize(uint64_t _id) = 0;
 
@@ -898,8 +868,6 @@ namespace max
 		///
 		/// @returns True if data is read.
 		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.cache_read`.
-		///
 		virtual bool cacheRead(uint64_t _id, void* _data, uint32_t _size) = 0;
 
 		/// Write cached item.
@@ -907,8 +875,6 @@ namespace max
 		/// @param[in] _id Cache id.
 		/// @param[in] _data Data to write.
 		/// @param[in] _size Size of data to write.
-		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.cache_write`.
 		///
 		virtual void cacheWrite(uint64_t _id, const void* _data, uint32_t _size) = 0;
 
@@ -922,8 +888,6 @@ namespace max
 		/// @param[in] _data Image data.
 		/// @param[in] _size Image size.
 		/// @param[in] _yflip If true, image origin is bottom left.
-		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.screen_shot`.
 		///
 		virtual void screenShot(
 			  const char* _filePath
@@ -944,8 +908,6 @@ namespace max
 		/// @param[in] _format Texture format. See: `TextureFormat::Enum`.
 		/// @param[in] _yflip If true, image origin is bottom left.
 		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.capture_begin`.
-		///
 		virtual void captureBegin(
 			  uint32_t _width
 			, uint32_t _height
@@ -956,16 +918,12 @@ namespace max
 
 		/// Called when a video capture ends.
 		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.capture_end`.
-		///
 		virtual void captureEnd() = 0;
 
 		/// Captured frame.
 		///
 		/// @param[in] _data Image data.
 		/// @param[in] _size Image size.
-		///
-		/// @attention C99's equivalent binding is `max_callback_vtbl.capture_frame`.
 		///
 		virtual void captureFrame(const void* _data, uint32_t _size) = 0;
 	};
@@ -1051,8 +1009,6 @@ namespace max
 
 		/// Configurable runtime limits parameters.
 		///
-		/// @attention C99's equivalent binding is `max_init_limits_t`.
-		///
 		struct Limits
 		{
 			Limits();
@@ -1080,15 +1036,11 @@ namespace max
 	/// param[in] _ptr Pointer to allocated data.
 	/// param[in] _userData User defined data if needed.
 	///
-	/// @attention C99's equivalent binding is `max_release_fn_t`.
-	///
 	typedef void (*ReleaseFn)(void* _ptr, void* _userData);
 
 	/// Memory must be obtained by calling `max::alloc`, `max::copy`, or `max::makeRef`.
 	///
 	/// @attention It is illegal to create this structure on stack and pass it to any max API.
-	///
-	/// @attention C99's equivalent binding is `max_memory_t`.
 	///
 	struct Memory
 	{
@@ -1151,8 +1103,6 @@ namespace max
 
 	/// Renderer capabilities.
 	///
-	/// @attention C99's equivalent binding is `max_caps_t`.
-	///
 	struct Caps
 	{
 		/// Renderer backend type. See: `max::RendererType`
@@ -1172,8 +1122,6 @@ namespace max
 
 		/// GPU info.
 		///
-		/// @attention C99's equivalent binding is `max_caps_gpu_t`.
-		///
 		struct GPU
 		{
 			uint16_t vendorId; //!< Vendor PCI id. See `MAX_PCI_ID_*`.
@@ -1183,8 +1131,6 @@ namespace max
 		GPU gpu[4]; //!< Enumerated GPUs.
 
 		/// Renderer runtime limits.
-		///
-		/// @attention C99's equivalent binding is `max_caps_limits_t`.
 		///
 		struct Limits
 		{
@@ -1255,8 +1201,6 @@ namespace max
 
 	/// Transient vertex buffer.
 	///
-	/// @attention C99's equivalent binding is `max_transient_vertex_buffer_t`.
-	///
 	struct TransientVertexBuffer
 	{
 		uint8_t* data;                      //!< Pointer to data.
@@ -1269,8 +1213,6 @@ namespace max
 
 	/// Instance data buffer info.
 	///
-	/// @attention C99's equivalent binding is `max_instance_data_buffer_t`.
-	///
 	struct InstanceDataBuffer
 	{
 		uint8_t* data;             //!< Pointer to data.
@@ -1282,8 +1224,6 @@ namespace max
 	};
 
 	/// Texture info.
-	///
-	/// @attention C99's equivalent binding is `max_texture_info_t`.
 	///
 	struct TextureInfo
 	{
@@ -1299,8 +1239,6 @@ namespace max
 	};
 
 	/// Uniform info.
-	///
-	/// @attention C99's equivalent binding is `max_uniform_info_t`.
 	///
 	struct UniformInfo
 	{
@@ -1327,8 +1265,6 @@ namespace max
 	};
 
 	/// Frame buffer texture attachment info.
-	///
-	/// @attention C99's equivalent binding is `max_attachment_t`.
 	///
 	struct Attachment
 	{
@@ -1359,8 +1295,6 @@ namespace max
 	};
 
 	/// Transform data.
-	///
-	/// @attention C99's equivalent binding is `max_transform_t`.
 	///
 	struct Transform
 	{
@@ -1424,8 +1358,6 @@ namespace max
 
 	/// View stats.
 	///
-	/// @attention C99's equivalent binding is `max_view_stats_t`.
-	///
 	struct ViewStats
 	{
 		char     name[256];      //!< View name.
@@ -1439,8 +1371,6 @@ namespace max
 
 	/// Encoder stats.
 	///
-	/// @attention C99's equivalent binding is `max_encoder_stats_t`.
-	///
 	struct EncoderStats
 	{
 		int64_t cpuTimeBegin; //!< Encoder thread CPU submit begin time.
@@ -1448,8 +1378,6 @@ namespace max
 	};
 
 	/// Renderer statistics data.
-	///
-	/// @attention C99's equivalent binding is `max_stats_t`.
 	///
 	/// @remarks All time values are high-resolution timestamps, while
 	///   time frequencies define timestamps-per-second for that hardware.
@@ -1511,8 +1439,6 @@ namespace max
 	/// Encoders are used for submitting draw calls from multiple threads. Only one encoder
 	/// per thread should be used. Use `max::begin()` to obtain an encoder for a thread.
 	///
-	/// @attention C99's equivalent binding is `max_encoder`.
-	///
 	struct Encoder
 	{
 		/// Sets a debug marker. This allows you to group graphics calls together for easy
@@ -1521,8 +1447,6 @@ namespace max
 		/// @param[in] _name Marker name.
 		/// @param[in] _len Marker name length (if length is INT32_MAX, it's expected that _name
 		///   is zero terminated string.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_marker`.
 		///
 		void setMarker(const char* _name, int32_t _len = INT32_MAX);
 
@@ -1552,8 +1476,6 @@ namespace max
 		///   2. `MAX_STATE_BLEND_EQUATION_ADD` is set when no other blend
 		///      equation is specified.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_state`.
-		///
 		void setState(
 			  uint64_t _state
 			, uint32_t _rgba = 0
@@ -1563,8 +1485,6 @@ namespace max
 		///
 		/// @param[in] _handle Occlusion query handle.
 		/// @param[in] _visible Render if occlusion query is visible.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_condition`.
 		///
 		void setCondition(
 			  OcclusionQueryHandle _handle
@@ -1576,8 +1496,6 @@ namespace max
 		/// @param[in] _fstencil Front stencil state.
 		/// @param[in] _bstencil Back stencil state. If back is set to `MAX_STENCIL_NONE`
 		///   _fstencil is applied to both front and back facing primitives.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_stencil`.
 		///
 		void setStencil(
 			  uint32_t _fstencil
@@ -1593,8 +1511,6 @@ namespace max
 		/// @param[in] _height Height of scissor region.
 		/// @returns Scissor cache index.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_scissor`.
-		///
 		uint16_t setScissor(
 			  uint16_t _x
 			, uint16_t _y
@@ -1607,8 +1523,6 @@ namespace max
 		/// @param[in] _cache Index in scissor cache.
 		///   Pass UINT16_MAX to have primitive use view scissor instead.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_scissor_cached`.
-		///
 		void setScissor(uint16_t _cache = UINT16_MAX);
 
 		/// Set model matrix for draw primitive. If it is not called, model will
@@ -1618,8 +1532,6 @@ namespace max
 		/// @param[in] _num Number of matrices in array.
 		/// @returns Index into matrix cache in case the same model matrix has
 		///   to be used for other draw primitive call.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_transform`.
 		///
 		uint32_t setTransform(
 			  const void* _mtx
@@ -1633,7 +1545,6 @@ namespace max
 		/// @returns Index into matrix cache.
 		///
 		/// @attention Pointer returned can be modified until `max::frame` is called.
-		/// @attention C99's equivalent binding is `max_encoder_alloc_transform`.
 		///
 		uint32_t allocTransform(
 			  Transform* _transform
@@ -1644,8 +1555,6 @@ namespace max
 		///
 		/// @param[in] _cache Index in matrix cache.
 		/// @param[in] _num Number of matrices from cache.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_transform_cached`.
 		///
 		void setTransform(
 			  uint32_t _cache
@@ -1659,8 +1568,6 @@ namespace max
 		/// @param[in] _num Number of elements. Passing `UINT16_MAX` will
 		///   use the _num passed on uniform creation.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_uniform`.
-		///
 		void setUniform(
 			  UniformHandle _handle
 			, const void* _value
@@ -1671,8 +1578,6 @@ namespace max
 		///
 		/// @param[in] _handle Index buffer.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_index_buffer`.
-		///
 		void setIndexBuffer(IndexBufferHandle _handle);
 
 		/// Set index buffer for draw primitive.
@@ -1680,8 +1585,6 @@ namespace max
 		/// @param[in] _handle Index buffer.
 		/// @param[in] _firstIndex First index to render.
 		/// @param[in] _numIndices Number of indices to render.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_index_buffer`.
 		///
 		void setIndexBuffer(
 			  IndexBufferHandle _handle
@@ -1693,8 +1596,6 @@ namespace max
 		///
 		/// @param[in] _handle Dynamic index buffer.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_dynamic_index_buffer`.
-		///
 		void setIndexBuffer(DynamicIndexBufferHandle _handle);
 
 		/// Set index buffer for draw primitive.
@@ -1702,8 +1603,6 @@ namespace max
 		/// @param[in] _handle Dynamic index buffer.
 		/// @param[in] _firstIndex First index to render.
 		/// @param[in] _numIndices Number of indices to render.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_dynamic_index_buffer`.
 		///
 		void setIndexBuffer(
 			  DynamicIndexBufferHandle _handle
@@ -1715,8 +1614,6 @@ namespace max
 		///
 		/// @param[in] _tib Transient index buffer.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_transient_index_buffer`.
-		///
 		void setIndexBuffer(const TransientIndexBuffer* _tib);
 
 		/// Set index buffer for draw primitive.
@@ -1724,8 +1621,6 @@ namespace max
 		/// @param[in] _tib Transient index buffer.
 		/// @param[in] _firstIndex First index to render.
 		/// @param[in] _numIndices Number of indices to render.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_transient_index_buffer`.
 		///
 		void setIndexBuffer(
 			  const TransientIndexBuffer* _tib
@@ -1737,8 +1632,6 @@ namespace max
 		///
 		/// @param[in] _stream Vertex stream.
 		/// @param[in] _handle Vertex buffer.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_vertex_buffer`.
 		///
 		void setVertexBuffer(
 			  uint8_t _stream
@@ -1753,8 +1646,6 @@ namespace max
 		/// @param[in] _numVertices Number of vertices to render.
 		/// @param[in] _layoutHandle Vertex layout for aliasing vertex buffer. If invalid handle is
 		///   used, vertex layout used for creation of vertex buffer will be used.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_vertex_buffer`.
 		///
 		void setVertexBuffer(
 			  uint8_t _stream
@@ -1769,8 +1660,6 @@ namespace max
 		/// @param[in] _stream Vertex stream.
 		/// @param[in] _handle Dynamic vertex buffer.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_dynamic_vertex_buffer`.
-		///
 		void setVertexBuffer(
 			  uint8_t _stream
 			, DynamicVertexBufferHandle _handle
@@ -1784,8 +1673,6 @@ namespace max
 		/// @param[in] _numVertices Number of vertices to render.
 		/// @param[in] _layoutHandle Vertex layout for aliasing vertex buffer. If invalid handle is
 		///   used, vertex layout used for creation of vertex buffer will be used.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_dynamic_vertex_buffer`.
 		///
 		void setVertexBuffer(
 			  uint8_t _stream
@@ -1799,8 +1686,6 @@ namespace max
 		///
 		/// @param[in] _stream Vertex stream.
 		/// @param[in] _tvb Transient vertex buffer.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_transient_vertex_buffer`.
 		///
 		void setVertexBuffer(
 			  uint8_t _stream
@@ -1815,8 +1700,6 @@ namespace max
 		/// @param[in] _numVertices Number of vertices to render.
 		/// @param[in] _layoutHandle Vertex layout for aliasing vertex buffer. If invalid handle is
 		///   used, vertex layout used for creation of vertex buffer will be used.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_transient_vertex_buffer`.
 		///
 		void setVertexBuffer(
 			  uint8_t _stream
@@ -1832,15 +1715,12 @@ namespace max
 		/// @param[in] _numVertices Number of vertices.
 		///
 		/// @attention Availability depends on: `MAX_CAPS_VERTEX_ID`.
-		/// @attention C99's equivalent binding is `max_encoder_set_vertex_count`.
 		///
 		void setVertexCount(uint32_t _numVertices);
 
 		/// Set instance data buffer for draw primitive.
 		///
 		/// @param[in] _idb Transient instance data buffer.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_instance_data_buffer`.
 		///
 		void setInstanceDataBuffer(const InstanceDataBuffer* _idb);
 
@@ -1849,8 +1729,6 @@ namespace max
 		/// @param[in] _idb Transient instance data buffer.
 		/// @param[in] _start First instance data.
 		/// @param[in] _num Number of data instances.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_instance_data_buffer`.
 		///
 		void setInstanceDataBuffer(
 			  const InstanceDataBuffer* _idb
@@ -1864,8 +1742,6 @@ namespace max
 		/// @param[in] _start First instance data.
 		/// @param[in] _num Number of data instances.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_instance_data_from_vertex_buffer`.
-		///
 		void setInstanceDataBuffer(
 			  VertexBufferHandle _handle
 			, uint32_t _start
@@ -1877,8 +1753,6 @@ namespace max
 		/// @param[in] _handle Vertex buffer.
 		/// @param[in] _start First instance data.
 		/// @param[in] _num Number of data instances.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_instance_data_from_dynamic_vertex_buffer`.
 		///
 		void setInstanceDataBuffer(
 			  DynamicVertexBufferHandle _handle
@@ -1892,7 +1766,6 @@ namespace max
 		/// @param[in] _numInstances Number of instances.
 		///
 		/// @attention Availability depends on: `MAX_CAPS_VERTEX_ID`.
-		/// @attention C99's equivalent binding is `max_encoder_set_instance_count`.
 		///
 		void setInstanceCount(uint32_t _numInstances);
 
@@ -1907,8 +1780,6 @@ namespace max
 		///     mode.
 		///   - `MAX_SAMPLER_[MIN/MAG/MIP]_[POINT/ANISOTROPIC]` - Point or anisotropic
 		///     sampling.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_texture`.
 		///
 		void setTexture(
 			  uint8_t _stage
@@ -1926,8 +1797,6 @@ namespace max
 		///
 		/// @param[in] _id View id.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_touch`.
-		///
 		void touch(ViewId _id);
 
 		/// Submit primitive for rendering.
@@ -1936,8 +1805,6 @@ namespace max
 		/// @param[in] _program Program.
 		/// @param[in] _depth Depth for sorting.
 		/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_submit`.
 		///
 		void submit(
 			  ViewId _id
@@ -1953,8 +1820,6 @@ namespace max
 		/// @param[in] _occlusionQuery Occlusion query.
 		/// @param[in] _depth Depth for sorting.
 		/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_submit_occlusion_query`.
 		///
 		void submit(
 			  ViewId _id
@@ -1976,7 +1841,6 @@ namespace max
 		/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
 		///
 		/// @attention Availability depends on: `MAX_CAPS_DRAW_INDIRECT`.
-		/// @attention C99's equivalent binding is `max_encoder_submit_indirect`.
 		///
 		void submit(
 			  ViewId _id
@@ -2003,7 +1867,6 @@ namespace max
 		/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
 		///
 		/// @attention Availability depends on: `MAX_CAPS_DRAW_INDIRECT_COUNT`.
-		/// @attention C99's equivalent binding is `max_encoder_submit_indirect_count`.
 		///
 		void submit(
 			  ViewId _id
@@ -2023,8 +1886,6 @@ namespace max
 		/// @param[in] _handle Index buffer handle.
 		/// @param[in] _access Buffer access. See `Access::Enum`.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_compute_index_buffer`.
-		///
 		void setBuffer(
 			  uint8_t _stage
 			, IndexBufferHandle _handle
@@ -2036,8 +1897,6 @@ namespace max
 		/// @param[in] _stage Compute stage.
 		/// @param[in] _handle Vertex buffer handle.
 		/// @param[in] _access Buffer access. See `Access::Enum`.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_compute_vertex_buffer`.
 		///
 		void setBuffer(
 			  uint8_t _stage
@@ -2051,8 +1910,6 @@ namespace max
 		/// @param[in] _handle Dynamic index buffer handle.
 		/// @param[in] _access Buffer access. See `Access::Enum`.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_compute_dynamic_index_buffer`.
-		///
 		void setBuffer(
 			  uint8_t _stage
 			, DynamicIndexBufferHandle _handle
@@ -2065,8 +1922,6 @@ namespace max
 		/// @param[in] _handle Dynamic vertex buffer handle.
 		/// @param[in] _access Buffer access. See `Access::Enum`.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_set_compute_dynamic_vertex_buffer`.
-		///
 		void setBuffer(
 			  uint8_t _stage
 			, DynamicVertexBufferHandle _handle
@@ -2078,8 +1933,6 @@ namespace max
 		/// @param[in] _stage Compute stage.
 		/// @param[in] _handle Indirect buffer handle.
 		/// @param[in] _access Buffer access. See `Access::Enum`.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_compute_indirect_buffer`.
 		///
 		void setBuffer(
 			  uint8_t _stage
@@ -2094,8 +1947,6 @@ namespace max
 		/// @param[in] _mip Mip level.
 		/// @param[in] _access Texture access. See `Access::Enum`.
 		/// @param[in] _format Texture format. See: `TextureFormat::Enum`.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_set_image`.
 		///
 		void setImage(
 			  uint8_t _stage
@@ -2113,8 +1964,6 @@ namespace max
 		/// @param[in] _numY Number of groups Y.
 		/// @param[in] _numZ Number of groups Z.
 		/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_dispatch`.
 		///
 		void dispatch(
 			  ViewId _id
@@ -2134,8 +1983,6 @@ namespace max
 		/// @param[in] _num Number of dispatches.
 		/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
 		///
-		/// @attention C99's equivalent binding is `max_encoder_dispatch_indirect`.
-		///
 		void dispatch(
 			  ViewId _id
 			, ProgramHandle _handle
@@ -2148,8 +1995,6 @@ namespace max
 		/// Discard all previously set state for draw or compute call.
 		///
 		/// @param[in] _flags Draw/compute states to discard.
-		///
-		/// @attention C99's equivalent binding is `max_encoder_discard`.
 		///
 		void discard(uint8_t _flags = MAX_DISCARD_ALL);
 
@@ -2167,7 +2012,6 @@ namespace max
 		///
 		/// @attention Destination texture must be created with `MAX_TEXTURE_BLIT_DST` flag.
 		/// @attention Availability depends on: `MAX_CAPS_TEXTURE_BLIT`.
-		/// @attention C99's equivalent binding is `max_encoder_blit`.
 		///
 		void blit(
 			  ViewId _id

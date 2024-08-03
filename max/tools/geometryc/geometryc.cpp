@@ -1,6 +1,6 @@
 /*
- * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/max/blob/master/LICENSE
+ * Copyright 2024 Marcus Madland. All rights reserved.
+ * License: https://github.com/marcusmadland/max/blob/mainICENSE
  */
 
 #include <algorithm>
@@ -1243,7 +1243,7 @@ void help(const char* _error = NULL)
 
 	bx::printf(
 		  "geometryc, max geometry compiler tool, version %d.%d.%d.\n"
-		  "Copyright 2011-2024 Branimir Karadzic. All rights reserved.\n"
+		  "Copyright 2024 Marcus Madland. All rights reserved.\n"
 		  "License: https://github.com/bkaradzic/max/blob/master/LICENSE\n\n"
 		, MAX_GEOMETRYC_VERSION_MAJOR
 		, MAX_GEOMETRYC_VERSION_MINOR

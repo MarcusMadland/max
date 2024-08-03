@@ -1,6 +1,6 @@
 /*
  * Copyright 2011-2015 Attila Kocsis, Branimir Karadzic. All rights reserved.
- * License: https://github.com/bkaradzic/max/blob/master/LICENSE
+ * License: https://github.com/marcusmadland/max/blob/mainICENSE
  */
 
 #ifndef MAX_RENDERER_METAL_H_HEADER_GUARD
