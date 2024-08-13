@@ -136,10 +136,10 @@ target_include_directories(
 )
 
 # max depends on bx and bimg
-target_link_libraries(max PRIVATE bx bimg jolt meshoptimizer)
+target_link_libraries(max PUBLIC bx bimg bimg_decode jolt meshoptimizer)
 
 if (MAX_BUILD_MINK)
-	target_link_libraries(max PRIVATE mink)
+	target_link_libraries(max PUBLIC mink)
 endif()
 
 # Frameworks required on iOS, tvOS and macOS

@@ -66,6 +66,7 @@ if(MAX_BUILD_TESTS)
 	enable_testing()
 endif()
 
+# Directories
 if(NOT BX_DIR)
 	set(BX_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bx" CACHE STRING "Location of bx.")
 elseif(NOT IS_ABSOLUTE "${BX_DIR}")
@@ -116,7 +117,7 @@ if(MAX_INSTALL)
 	set(namespace "${PROJECT_NAME}::")
 endif()
 
-# Check if we should build with MAX
+# Check if we should build with MINK
 if(IS_DIRECTORY ${MINK_DIR})
 	set(MAX_BUILD_MINK ON)
 else()

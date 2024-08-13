@@ -722,8 +722,8 @@ namespace max
 	MAX_HANDLE(VertexLayoutHandle)
 	MAX_HANDLE(WindowHandle)
 	MAX_HANDLE(GamepadHandle)
-	MAX_HANDLE(MaterialHandle)
 	MAX_HANDLE(MeshHandle)
+	MAX_HANDLE(DynamicMeshHandle)
 	MAX_HANDLE(ComponentHandle)
 	MAX_HANDLE(EntityHandle)
 	MAX_HANDLE(BodyHandle)
@@ -2310,14 +2310,22 @@ namespace max
 		void alloc(uint32_t _num);
 		void free();
 
-		struct HandleData
-		{
-			bool m_dynamic;
-			uint16_t m_vertexHandleIdx;
-			uint16_t m_indexHandleIdx;
-		};
-		HandleData* m_handleData;
+		VertexBufferHandle* m_vertices;
+		IndexBufferHandle* m_indices;
 		
+		uint32_t m_num;
+	};
+
+	/// Dynamic mesh query.
+	///
+	struct DynamicMeshQuery
+	{
+		void alloc(uint32_t _num);
+		void free();
+
+		DynamicVertexBufferHandle* m_vertices;
+		DynamicIndexBufferHandle* m_indices;
+
 		uint32_t m_num;
 	};
 
@@ -2355,6 +2363,12 @@ namespace max
 	template<typename... Components>
 	struct System
 	{
+		System()
+			: m_num(0)
+		{}
+
+		uint32_t m_num;
+
 		void each(uint32_t _max, SystemFn _func, void* _userData = NULL)
 		{
 			HashQuery m_query;
@@ -2368,6 +2382,8 @@ namespace max
 				return;
 			}
 
+			m_num = qr->m_num;
+
 			for (uint32_t ii = 0; ii < qr->m_num; ++ii)
 			{
 				_func(qr->m_entities[ii], _userData);
@@ -2375,6 +2391,8 @@ namespace max
 
 			m_query.free();
 		}
+
+		// @todo first() ?
 
 	private:
 		template<typename T>
@@ -2962,7 +2980,10 @@ namespace max
 	void inputProcess();
 
 	///
-	float inputGetValue(uint32_t _id, uint32_t _action);
+	float inputGetAsFloat(uint32_t _id, uint32_t _action);
+
+	///
+	bool inputGetAsBool(uint32_t _id, uint32_t _action);
 
 	///
 	void inputSetKeyState(Key::Enum  _key, uint8_t _modifiers, bool _down);
@@ -4080,30 +4101,6 @@ namespace max
 	///
 	void destroy(UniformHandle _handle);
 
-	/// Create material from program.
-	///
-	/// @param[in] _program Program to read uniform values from.
-	///
-	MaterialHandle createMaterial(ProgramHandle _program);
-
-	/// Set material for draw primitive.
-	///
-	/// @param[in] _handle Material handle.
-	///
-	void setMaterial(MaterialHandle _material);
-
-	/// @todo Add comment.
-	void addParameter(MaterialHandle _material, const char* _name, float* _value, uint32_t _num = 1);
-
-	/// @todo Add comment.
-	void addParameter(MaterialHandle _material, const char* _name, uint32_t _stage, TextureHandle _texture);
-
-	/// Destroy material.
-	///
-	/// @param[in] _handle Handle to material object.
-	///
-	void destroy(MaterialHandle _handle);
-
 	/// Create mesh from memory buffer.
 	///
 	/// @returns Mesh handle.
@@ -4118,18 +4115,9 @@ namespace max
 	/// @param[in] _vertices Vertex buffer data.
 	/// @param[in] _indices Index buffer data.
 	/// @param[in] _layout Vertex layout.
-	/// @param[in] _dynamic Create dynamic mesh that can be updated.
 	/// @returns Mesh handle.
 	///
-	MeshHandle createMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout, bool _dynamic = false);
-
-	/// Update dynamic mesh.
-	///
-	/// @param[in] _handle Dynamic mesh handle.
-	/// @param[in] _vertices Vertex buffer data.
-	/// @param[in] _indices Index buffer data.
-	///
-	void update(MeshHandle _mesh, const Memory* _vertices, const Memory* _indices);
+	MeshHandle createMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout);
 
 	/// Create mesh from path.
 	///
@@ -4150,6 +4138,52 @@ namespace max
 	/// @param[in] _handle Handle to mesh object.
 	///
 	void destroy(MeshHandle _handle);
+
+	/// Create dynamic mesh from memory buffer.
+	///
+	/// @returns Dynamic mesh handle.
+	///
+	/// @remarks
+	///   Mesh binary is obtained by compiling mesh offline with geometryc command line tool.
+	///
+	DynamicMeshHandle createDynamicMesh(const Memory* _mem, bool _ramcopy = false);
+
+	/// Create dynamic mesh from vertices and indices buffers.
+	///
+	/// @param[in] _vertices Vertex buffer data.
+	/// @param[in] _indices Index buffer data.
+	/// @param[in] _layout Vertex layout.
+	/// @returns Mesh handle.
+	///
+	DynamicMeshHandle createDynamicMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout);
+
+	/// Create dynamic mesh from path.
+	///
+	/// @param[in] _filePath Path of the geometry binary.
+	/// @param[in] _ramcopy Should copy the memory.
+	/// @returns Dynamic mesh handle.
+	///
+	/// @remarks
+	///   Mesh binary is obtained by compiling mesh offline with geometryc command line tool.
+	///
+	DynamicMeshHandle loadDynamicMesh(const char* _filePath, bool _ramcopy = false);
+
+	/// 
+	DynamicMeshQuery* queryDynamicMesh(DynamicMeshHandle _handle);
+
+	/// Update dynamic mesh.
+	///
+	/// @param[in] _handle Dynamic mesh handle.
+	/// @param[in] _vertices Vertex buffer data.
+	/// @param[in] _indices Index buffer data.
+	///
+	void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices);
+
+	/// Destroy dynamic mesh.
+	///
+	/// @param[in] _handle Handle to dynamic mesh object.
+	///
+	void destroy(DynamicMeshHandle _handle);
 
 	/// Create component from data.
 	///
@@ -5057,22 +5091,6 @@ namespace max
 		, uint32_t _depth = 0
 		, uint8_t _flags  = MAX_DISCARD_ALL
 		);
-
-	/// Submit primitive for rendering.
-	///
-	/// @param[in] _id View id.
-	/// @param[in] _material Material.
-	/// @param[in] _depth Depth for sorting.
-	/// @param[in] _flags Discard or preserve states. See `MAX_DISCARD_*`.
-	///
-	/// @attention C99's equivalent binding is `max_submit`.
-	///
-	void submit(
-		  ViewId _id
-		, MaterialHandle _material
-		, uint32_t _depth = 0
-		, uint8_t _flags = MAX_DISCARD_ALL
-	);
 
 	/// Submit primitive with occlusion query for rendering.
 	///

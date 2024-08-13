@@ -3570,7 +3570,6 @@ namespace max
 			CHECK_HANDLE_LEAK_RC_NAME("UniformHandle",             m_uniformHandle,            UniformRef,     m_uniformRef    );
 			CHECK_HANDLE_LEAK        ("BodyHandle",				   m_bodyHandle												   );
 			CHECK_HANDLE_LEAK        ("OcclusionQueryHandle",      m_occlusionQueryHandle                                      );
-			CHECK_HANDLE_LEAK        ("MaterialHandle",            m_materialHandle                                            );
 			CHECK_HANDLE_LEAK        ("MeshHandle",                m_meshHandle                                                );
 			CHECK_HANDLE_LEAK        ("ComponentHandle",           m_componentHandle                                           );
 			CHECK_HANDLE_LEAK        ("EntityHandle",              m_entityHandle                                              );
@@ -3646,11 +3645,6 @@ namespace max
 		for (uint16_t ii = 0, num = _frame->m_freeUniform.getNumQueued(); ii < num; ++ii)
 		{
 			m_uniformHandle.free(_frame->m_freeUniform.get(ii).idx);
-		}
-
-		for (uint16_t ii = 0, num = _frame->m_freeMaterial.getNumQueued(); ii < num; ++ii)
-		{
-			m_materialHandle.free(_frame->m_freeMaterial.get(ii).idx);
 		}
 
 		for (uint16_t ii = 0, num = _frame->m_freeMesh.getNumQueued(); ii < num; ++ii)
@@ -5511,13 +5505,29 @@ namespace max
 
 	void MeshQuery::alloc(uint32_t _num)
 	{
-		m_handleData = (MeshQuery::HandleData*)bx::alloc(g_allocator, sizeof(MeshQuery::HandleData) * _num);
+		m_vertices = (VertexBufferHandle*)bx::alloc(g_allocator, sizeof(VertexBufferHandle) * _num);
+		m_indices = (IndexBufferHandle*)bx::alloc(g_allocator, sizeof(IndexBufferHandle) * _num);
 		m_num = 0;
 	}
 
 	void MeshQuery::free()
 	{
-		bx::free(g_allocator, m_handleData);
+		bx::free(g_allocator, m_vertices);
+		bx::free(g_allocator, m_indices);
+		m_num = 0;
+	}
+
+	void DynamicMeshQuery::alloc(uint32_t _num)
+	{
+		m_vertices = (DynamicVertexBufferHandle*)bx::alloc(g_allocator, sizeof(DynamicVertexBufferHandle) * _num);
+		m_indices = (DynamicIndexBufferHandle*)bx::alloc(g_allocator, sizeof(DynamicIndexBufferHandle) * _num);
+		m_num = 0;
+	}
+
+	void DynamicMeshQuery::free()
+	{
+		bx::free(g_allocator, m_vertices);
+		bx::free(g_allocator, m_indices);
 		m_num = 0;
 	}
 
@@ -5935,9 +5945,14 @@ namespace max
 		s_ctx->processInput();
 	}
 
-	float inputGetValue(uint32_t _id, uint32_t _action)
+	float inputGetAsFloat(uint32_t _id, uint32_t _action)
 	{
 		return s_ctx->getValue(_id, _action);
+	}
+
+	bool inputGetAsBool(uint32_t _id, uint32_t _action)
+	{
+		return s_ctx->getValue(_id, _action) > 0.5f ? true : false;
 	}
 
 	void inputSetMouseResolution(uint16_t _width, uint16_t _height)
@@ -7206,46 +7221,15 @@ namespace max
 	{
 		s_ctx->destroyUniform(_handle);
 	}
-
-
-	MaterialHandle createMaterial(ProgramHandle _program)
-	{
-		return s_ctx->createMaterial(_program);
-	}
 	
-	void setMaterial(MaterialHandle _material)
-	{
-		s_ctx->setMaterial(_material);
-	}
-
-	void addParameter(MaterialHandle _material, const char* _name, float* _value, uint32_t _num)
-	{
-		s_ctx->addParameter(_material, _name, _value, _num);
-	}
-
-	void addParameter(MaterialHandle _material, const char* _name, uint32_t _stage, TextureHandle _texture)
-	{
-		s_ctx->addParameter(_material, _name, _stage, _texture);
-	}
-
-	void destroy(MaterialHandle _handle)
-	{
-		s_ctx->destroyMaterial(_handle);
-	}
-
 	MeshHandle createMesh(const Memory* _mem, bool _ramcopy)
 	{
 		return s_ctx->createMesh(_mem, _ramcopy);
 	}
 
-	MeshHandle createMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout, bool _dynamic)
+	MeshHandle createMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout)
 	{
-		return s_ctx->createMesh(_vertices, _indices, _layout, _dynamic);
-	}
-
-	void update(MeshHandle _mesh, const Memory* _vertices, const Memory* _indices)
-	{
-		s_ctx->update(_mesh, _vertices, _indices);
+		return s_ctx->createMesh(_vertices, _indices, _layout);
 	}
 
 	MeshHandle loadMesh(const char* _filePath, bool _ramcopy)
@@ -7263,6 +7247,38 @@ namespace max
 	void destroy(MeshHandle _handle)
 	{
 		s_ctx->destroyMesh(_handle);
+	}
+	
+	DynamicMeshHandle createDynamicMesh(const Memory* _mem, bool _ramcopy)
+	{
+		return s_ctx->createDynamicMesh(_mem, _ramcopy);
+	}
+	
+	DynamicMeshHandle createDynamicMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout)
+	{
+		return s_ctx->createDynamicMesh(_vertices, _indices, _layout);
+	}
+
+	DynamicMeshHandle loadDynamicMesh(const char* _filePath, bool _ramcopy)
+	{
+		const Memory* mem = loadMemory(_filePath);
+		DynamicMeshHandle handle = s_ctx->createDynamicMesh(mem, _ramcopy);
+		return handle;
+	}
+
+	DynamicMeshQuery* queryDynamicMesh(DynamicMeshHandle _handle)
+	{
+		return s_ctx->queryDynamicMesh(_handle);
+	}
+	
+	void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices)
+	{
+		s_ctx->update(_mesh, _vertices, _indices);
+	}
+
+	void destroy(DynamicMeshHandle _handle)
+	{
+		s_ctx->destroyDynamicMesh(_handle);
 	}
 
 	ComponentHandle createComponent(void* _data, uint32_t _size)
@@ -7811,14 +7827,6 @@ namespace max
 	{
 		MAX_CHECK_ENCODER0();
 		s_ctx->m_encoder0->submit(_id, _program, _depth, _flags);
-	}
-
-	void submit(ViewId _id, MaterialHandle _material, uint32_t _depth, uint8_t _flags)
-	{
-		MaterialRef& mr = s_ctx->m_materialRef[_material.idx];
-
-		MAX_CHECK_ENCODER0();
-		s_ctx->m_encoder0->submit(_id, mr.m_program, _depth, _flags);
 	}
 
 	void submit(ViewId _id, ProgramHandle _program, OcclusionQueryHandle _occlusionQuery, uint32_t _depth, uint8_t _flags)
