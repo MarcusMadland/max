@@ -7332,10 +7332,21 @@ namespace max
 			mr.m_refCount = 1;
 			mr.m_layout = _layout;
 
-			Group group;
-			group.m_vbh = max::createVertexBuffer(_vertices, _layout);
-			group.m_ibh = max::createIndexBuffer(_indices);
+			uint32_t stride = _layout.getStride();
 
+			Group group;
+			group.m_numVertices = _vertices->size / stride;
+			group.m_numIndices = _indices->size / sizeof(uint16_t);
+
+			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
+			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
+
+			group.m_indices = (uint16_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
+			bx::memCopy(group.m_indices, _indices->data, _indices->size);
+
+			group.m_vbh = max::createVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
+			group.m_ibh = max::createIndexBuffer(max::makeRef(group.m_indices, _indices->size));
+			
 			mr.m_groups.push_back(group);
 
 			return handle;
@@ -7354,6 +7365,7 @@ namespace max
 
 			stl::vector<VertexBufferHandle> vb;
 			stl::vector<IndexBufferHandle> ib;
+			stl::vector<MeshQuery::Data> data;
 
 			for (uint32_t ii = 0; ii < m_meshQuery.m_num; ++ii)
 			{
@@ -7361,6 +7373,13 @@ namespace max
 
 				vb.push_back(group.m_vbh);
 				ib.push_back(group.m_ibh);
+
+				MeshQuery::Data groupData;
+				groupData.m_numVertices = group.m_numVertices;
+				groupData.m_numIndices = group.m_numIndices;
+				groupData.m_vertices = group.m_vertices;
+				groupData.m_indices = group.m_indices;
+				data.push_back(groupData);
 			}
 
 			bx::memCopy(
@@ -7375,7 +7394,23 @@ namespace max
 				(sizeof(IndexBufferHandle)) * m_meshQuery.m_num
 			);
 
+			bx::memCopy(
+				m_meshQuery.m_data,
+				data.data(),
+				(sizeof(MeshQuery::Data)) * m_meshQuery.m_num
+			);
+
 			return &m_meshQuery;
+		}
+
+		MAX_API_FUNC(const max::VertexLayout getLayout(MeshHandle _handle))
+		{
+			MAX_MUTEX_SCOPE(m_resourceApiLock);
+
+			MAX_CHECK_HANDLE("getLayout", m_meshHandle, _handle);
+
+			MeshRef& mr = m_meshRef[_handle.idx];
+			return mr.m_layout;
 		}
 
 		MAX_API_FUNC(void destroyMesh(MeshHandle _handle))
@@ -7436,7 +7471,7 @@ namespace max
 				}
 				mr.m_groups.clear();
 
-				m_meshHashMap.removeByHandle(_handle.idx);
+				m_dynamicMeshHashMap.removeByHandle(_handle.idx);
 			}
 		}
 
@@ -7661,9 +7696,19 @@ namespace max
 			mr.m_refCount = 1;
 			mr.m_layout = _layout;
 
+			uint32_t stride = _layout.getStride();
+
 			DynamicGroup group;
-			group.m_vbh = max::createDynamicVertexBuffer(_vertices, _layout);
-			group.m_ibh = max::createDynamicIndexBuffer(_indices);
+
+			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, _vertices->size);
+			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
+			group.m_indices = (uint16_t*)bx::alloc(g_allocator, _indices->size);
+			bx::memCopy(group.m_indices, _indices->data, _indices->size);
+
+			group.m_numVertices = _vertices->size / stride;
+			group.m_numIndices = _indices->size / sizeof(uint16_t);
+			group.m_vbh = max::createDynamicVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
+			group.m_ibh = max::createDynamicIndexBuffer(max::makeRef(group.m_indices, _indices->size));
 
 			mr.m_groups.push_back(group);
 
@@ -7674,7 +7719,7 @@ namespace max
 		{
 			MAX_MUTEX_SCOPE(m_resourceApiLock);
 
-			MAX_CHECK_HANDLE("queryMesh", m_dynamicMeshHandle, _handle);
+			MAX_CHECK_HANDLE("queryDynamicMesh", m_dynamicMeshHandle, _handle);
 
 			DynamicMeshRef& mr = m_dynamicMeshRef[_handle.idx];
 
@@ -7683,6 +7728,7 @@ namespace max
 
 			stl::vector<DynamicVertexBufferHandle> vb;
 			stl::vector<DynamicIndexBufferHandle> ib;
+			stl::vector<DynamicMeshQuery::Data> data;
 
 			for (uint32_t ii = 0; ii < m_dynamicMeshQuery.m_num; ++ii)
 			{
@@ -7690,6 +7736,13 @@ namespace max
 
 				vb.push_back(group.m_vbh);
 				ib.push_back(group.m_ibh);
+
+				DynamicMeshQuery::Data groupData;
+				groupData.m_numVertices = group.m_numVertices;
+				groupData.m_numIndices = group.m_numIndices;
+				groupData.m_vertices = group.m_vertices;
+				groupData.m_indices = group.m_indices;
+				data.push_back(groupData);
 			}
 
 			bx::memCopy(
@@ -7704,7 +7757,23 @@ namespace max
 				(sizeof(DynamicIndexBufferHandle)) * m_dynamicMeshQuery.m_num
 			);
 
+			bx::memCopy(
+				m_dynamicMeshQuery.m_data,
+				data.data(),
+				(sizeof(DynamicMeshQuery::Data)) * m_dynamicMeshQuery.m_num
+			);
+
 			return &m_dynamicMeshQuery;
+		}
+
+		MAX_API_FUNC(const max::VertexLayout getLayout(DynamicMeshHandle _handle))
+		{
+			MAX_MUTEX_SCOPE(m_resourceApiLock);
+
+			MAX_CHECK_HANDLE("getLayout", m_dynamicMeshHandle, _handle);
+
+			DynamicMeshRef& mr = m_dynamicMeshRef[_handle.idx];
+			return mr.m_layout;
 		}
 
 		MAX_API_FUNC(void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices))

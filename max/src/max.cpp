@@ -3414,6 +3414,7 @@ namespace max
 		// @todo Move elsewhere? 
 		m_entityQuery.alloc(MAX_CONFIG_MAX_ENTITIES);
 		m_meshQuery.alloc(MAX_CONFIG_MAX_MESH_GROUPS);
+		m_dynamicMeshQuery.alloc(MAX_CONFIG_MAX_MESH_GROUPS);
 
 		return true;
 	}
@@ -3423,6 +3424,7 @@ namespace max
 		// @todo Move elsewhere? 
 		m_entityQuery.free();
 		m_meshQuery.free();
+		m_dynamicMeshQuery.free();
 
 		s_dde.shutdown();
 		s_dds.shutdown();
@@ -3571,6 +3573,7 @@ namespace max
 			CHECK_HANDLE_LEAK        ("BodyHandle",				   m_bodyHandle												   );
 			CHECK_HANDLE_LEAK        ("OcclusionQueryHandle",      m_occlusionQueryHandle                                      );
 			CHECK_HANDLE_LEAK        ("MeshHandle",                m_meshHandle                                                );
+			CHECK_HANDLE_LEAK	     ("DynamicMeshHandle",         m_dynamicMeshHandle										   );
 			CHECK_HANDLE_LEAK        ("ComponentHandle",           m_componentHandle                                           );
 			CHECK_HANDLE_LEAK        ("EntityHandle",              m_entityHandle                                              );
 #undef CHECK_HANDLE_LEAK
@@ -3650,6 +3653,11 @@ namespace max
 		for (uint16_t ii = 0, num = _frame->m_freeMesh.getNumQueued(); ii < num; ++ii)
 		{
 			m_meshHandle.free(_frame->m_freeMesh.get(ii).idx);
+		}
+
+		for (uint16_t ii = 0, num = _frame->m_freeDynamicMesh.getNumQueued(); ii < num; ++ii)
+		{
+			m_dynamicMeshHandle.free(_frame->m_freeDynamicMesh.get(ii).idx);
 		}
 
 		for (uint16_t ii = 0, num = _frame->m_freeComponent.getNumQueued(); ii < num; ++ii)
@@ -5505,6 +5513,7 @@ namespace max
 
 	void MeshQuery::alloc(uint32_t _num)
 	{
+		m_data = (Data*)bx::alloc(g_allocator, sizeof(Data) * _num);
 		m_vertices = (VertexBufferHandle*)bx::alloc(g_allocator, sizeof(VertexBufferHandle) * _num);
 		m_indices = (IndexBufferHandle*)bx::alloc(g_allocator, sizeof(IndexBufferHandle) * _num);
 		m_num = 0;
@@ -5512,6 +5521,7 @@ namespace max
 
 	void MeshQuery::free()
 	{
+		bx::free(g_allocator, m_data);
 		bx::free(g_allocator, m_vertices);
 		bx::free(g_allocator, m_indices);
 		m_num = 0;
@@ -5519,6 +5529,7 @@ namespace max
 
 	void DynamicMeshQuery::alloc(uint32_t _num)
 	{
+		m_data = (Data*)bx::alloc(g_allocator, sizeof(Data) * _num);
 		m_vertices = (DynamicVertexBufferHandle*)bx::alloc(g_allocator, sizeof(DynamicVertexBufferHandle) * _num);
 		m_indices = (DynamicIndexBufferHandle*)bx::alloc(g_allocator, sizeof(DynamicIndexBufferHandle) * _num);
 		m_num = 0;
@@ -5526,6 +5537,7 @@ namespace max
 
 	void DynamicMeshQuery::free()
 	{
+		bx::free(g_allocator, m_data);
 		bx::free(g_allocator, m_vertices);
 		bx::free(g_allocator, m_indices);
 		m_num = 0;
@@ -7244,6 +7256,11 @@ namespace max
 		return s_ctx->queryMesh(_handle);
 	}
 
+	const max::VertexLayout getLayout(MeshHandle _handle)
+	{
+		return s_ctx->getLayout(_handle);
+	}
+
 	void destroy(MeshHandle _handle)
 	{
 		s_ctx->destroyMesh(_handle);
@@ -7270,7 +7287,12 @@ namespace max
 	{
 		return s_ctx->queryDynamicMesh(_handle);
 	}
-	
+
+	const max::VertexLayout getLayout(DynamicMeshHandle _handle)
+	{
+		return s_ctx->getLayout(_handle);
+	}
+
 	void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices)
 	{
 		s_ctx->update(_mesh, _vertices, _indices);

@@ -5,11 +5,11 @@ $input a_position
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
-#include "bgfx_shader.sh"
+#include "max_shader.sh"
 
-uniform vec4 bgfx_clear_depth;
+uniform vec4 max_clear_depth;
 
 void main()
 {
-	gl_Position = vec4(a_position.xy, bgfx_clear_depth.x, 1.0);
+	gl_Position = vec4(a_position.xy, max_clear_depth.x, 1.0);
 }

@@ -19,7 +19,7 @@ file(
 add_library(bimg STATIC ${BIMG_SOURCES})
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(bimg PROPERTIES FOLDER "max")
+set_target_properties(bimg PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(
 	bimg PUBLIC $<BUILD_INTERFACE:${BIMG_DIR}/include>$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>

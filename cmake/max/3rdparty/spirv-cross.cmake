@@ -39,7 +39,7 @@ add_library(spirv-cross STATIC ${SPIRV_CROSS_SOURCES})
 target_compile_definitions(spirv-cross PRIVATE SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS)
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(spirv-cross PROPERTIES FOLDER "max")
+set_target_properties(spirv-cross PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(
 	spirv-cross #

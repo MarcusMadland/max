@@ -627,6 +627,6 @@ if(MAX_INSTALL)
 endif()
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(jolt PROPERTIES FOLDER "max")
+set_target_properties(jolt PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(jolt PRIVATE ${JOLT_DIR}/../)

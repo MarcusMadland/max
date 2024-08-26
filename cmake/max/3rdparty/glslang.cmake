@@ -41,7 +41,7 @@ target_compile_definitions(
 )
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(glslang PROPERTIES FOLDER "max")
+set_target_properties(glslang PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(
 	glslang

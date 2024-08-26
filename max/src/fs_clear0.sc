@@ -3,11 +3,11 @@
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
-#include "bgfx_shader.sh"
+#include "max_shader.sh"
 
-uniform vec4 bgfx_clear_color[8];
+uniform vec4 max_clear_color[8];
 
 void main()
 {
-	gl_FragColor = bgfx_clear_color[0];
+	gl_FragColor = max_clear_color[0];
 }

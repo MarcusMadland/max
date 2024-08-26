@@ -172,7 +172,7 @@ file(
 add_library(glsl-optimizer STATIC ${GLSL_OPTIMIZER_SOURCES})
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(glsl-optimizer PROPERTIES FOLDER "max")
+set_target_properties(glsl-optimizer PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(
 	glsl-optimizer

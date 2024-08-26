@@ -31,7 +31,7 @@ target_compile_definitions(
 )
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(fcpp PROPERTIES FOLDER "max")
+set_target_properties(fcpp PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(fcpp PUBLIC ${FCPP_DIR})
 

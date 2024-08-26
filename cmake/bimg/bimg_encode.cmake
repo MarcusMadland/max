@@ -8,7 +8,7 @@ endif()
 add_library(bimg_encode STATIC)
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(bimg_encode PROPERTIES FOLDER "max")
+set_target_properties(bimg_encode PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(
 	bimg_encode

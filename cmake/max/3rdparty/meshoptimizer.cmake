@@ -23,6 +23,6 @@ if(MAX_INSTALL)
 endif()
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(meshoptimizer PROPERTIES FOLDER "max")
+set_target_properties(meshoptimizer PROPERTIES FOLDER "max/3rdparty")
 
 #target_include_directories(meshoptimizer PUBLIC ${MESHOPTIMIZER_DIR})

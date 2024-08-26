@@ -6,7 +6,7 @@ $output v_color0, v_color1, v_texcoord0
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
-#include "bgfx_shader.sh"
+#include "max_shader.sh"
 
 void main()
 {

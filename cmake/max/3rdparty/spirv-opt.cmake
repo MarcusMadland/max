@@ -124,7 +124,7 @@ file(
 add_library(spirv-opt STATIC ${SPIRV_OPT_SOURCES})
 
 # Put in a "max" folder in Visual Studio
-set_target_properties(spirv-opt PROPERTIES FOLDER "max")
+set_target_properties(spirv-opt PROPERTIES FOLDER "max/3rdparty")
 
 target_include_directories(
 	spirv-opt

@@ -2310,6 +2310,16 @@ namespace max
 		void alloc(uint32_t _num);
 		void free();
 
+		struct Data
+		{
+			uint16_t m_numVertices;
+			uint8_t* m_vertices;
+			uint32_t m_numIndices;
+			uint16_t* m_indices;
+
+		};
+
+		Data* m_data;
 		VertexBufferHandle* m_vertices;
 		IndexBufferHandle* m_indices;
 		
@@ -2323,6 +2333,16 @@ namespace max
 		void alloc(uint32_t _num);
 		void free();
 
+		struct Data
+		{
+			uint16_t m_numVertices;
+			uint8_t* m_vertices;
+			uint32_t m_numIndices;
+			uint16_t* m_indices;
+
+		};
+
+		Data* m_data;
 		DynamicVertexBufferHandle* m_vertices;
 		DynamicIndexBufferHandle* m_indices;
 
@@ -4133,6 +4153,9 @@ namespace max
 	/// 
 	MeshQuery* queryMesh(MeshHandle _handle);
 
+	/// 
+	const max::VertexLayout getLayout(MeshHandle _handle);
+
 	/// Destroy mesh.
 	///
 	/// @param[in] _handle Handle to mesh object.
@@ -4170,6 +4193,9 @@ namespace max
 
 	/// 
 	DynamicMeshQuery* queryDynamicMesh(DynamicMeshHandle _handle);
+
+	/// 
+	const max::VertexLayout getLayout(DynamicMeshHandle _handle);
 
 	/// Update dynamic mesh.
 	///

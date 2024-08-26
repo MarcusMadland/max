@@ -4620,7 +4620,7 @@ namespace max { namespace gl
 				}
 
 				float mrtClearDepth[4] = { g_caps.homogeneousDepth ? (_clear.m_depth * 2.0f - 1.0f) : _clear.m_depth };
-				updateUniform(m_clearQuadDepth.idx, mrtClearDepth, sizeof(float)*4);
+				updateUniform(m_clearQuadDepth.idx, mrtClearDepth, sizeof(float) * 4);
 
 				float mrtClearColor[MAX_CONFIG_MAX_FRAME_BUFFER_ATTACHMENTS][4];
 
