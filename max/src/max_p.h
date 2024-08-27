@@ -2353,7 +2353,7 @@ namespace max
 		uint16_t m_numVertices;
 		uint8_t* m_vertices;
 		uint32_t m_numIndices;
-		uint16_t* m_indices;
+		uint32_t* m_indices;
 		bx::Sphere m_sphere;
 		bx::Aabb   m_aabb;
 		bx::Obb    m_obb;
@@ -2392,7 +2392,7 @@ namespace max
 		uint16_t m_numVertices;
 		uint8_t* m_vertices;
 		uint32_t m_numIndices;
-		uint16_t* m_indices;
+		uint32_t* m_indices;
 		bx::Sphere m_sphere;
 		bx::Aabb   m_aabb;
 		bx::Obb    m_obb;
@@ -7111,6 +7111,7 @@ namespace max
 			}
 		}
 
+		// @todo Rewrite mesh compiler to use uint32_t for indices instead of uint16_t.
 		MAX_API_FUNC(MeshHandle createMesh(const Memory* _mem, bool _ramcopy))
 		{
 			MAX_MUTEX_SCOPE(m_resourceApiLock);
@@ -7222,8 +7223,12 @@ namespace max
 
 					if (_ramcopy)
 					{
-						group.m_indices = (uint16_t*)bx::alloc(g_allocator, group.m_numIndices * 2);
-						bx::memCopy(group.m_indices, mem->data, mem->size);
+						group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numIndices * sizeof(uint32_t));
+						const uint16_t* src = (const uint16_t*)mem->data;
+						for (uint32_t i = 0; i < group.m_numIndices; ++i)
+						{
+							group.m_indices[i] = (uint32_t)src[i];
+						}
 					}
 
 					group.m_ibh = createIndexBuffer(mem, MAX_BUFFER_NONE);
@@ -7249,8 +7254,12 @@ namespace max
 
 					if (_ramcopy)
 					{
-						group.m_indices = (uint16_t*)bx::alloc(g_allocator, group.m_numIndices * 2);
-						bx::memCopy(group.m_indices, mem->data, mem->size);
+						group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numIndices * sizeof(uint32_t));
+						const uint16_t* src = (const uint16_t*)mem->data;
+						for (uint32_t i = 0; i < group.m_numIndices; ++i)
+						{
+							group.m_indices[i] = (uint32_t)src[i];
+						}
 					}
 
 					group.m_ibh = createIndexBuffer(mem, MAX_BUFFER_NONE);
@@ -7332,20 +7341,20 @@ namespace max
 			mr.m_refCount = 1;
 			mr.m_layout = _layout;
 
-			uint32_t stride = _layout.getStride();
+			uint16_t stride = _layout.getStride();
 
 			Group group;
 			group.m_numVertices = _vertices->size / stride;
-			group.m_numIndices = _indices->size / sizeof(uint16_t);
+			group.m_numIndices = _indices->size / sizeof(uint32_t);
 
 			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
 			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
 
-			group.m_indices = (uint16_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
+			group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
 			bx::memCopy(group.m_indices, _indices->data, _indices->size);
 
 			group.m_vbh = max::createVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
-			group.m_ibh = max::createIndexBuffer(max::makeRef(group.m_indices, _indices->size));
+			group.m_ibh = max::createIndexBuffer(max::makeRef(group.m_indices, _indices->size), MAX_BUFFER_INDEX32);
 			
 			mr.m_groups.push_back(group);
 
@@ -7475,6 +7484,7 @@ namespace max
 			}
 		}
 
+		// @todo Rewrite mesh compiler to use uint32_t for indices instead of uint16_t.
 		MAX_API_FUNC(DynamicMeshHandle createDynamicMesh(const Memory* _mem, bool _ramcopy))
 		{
 			MAX_MUTEX_SCOPE(m_resourceApiLock);
@@ -7586,8 +7596,12 @@ namespace max
 
 					if (_ramcopy)
 					{
-						group.m_indices = (uint16_t*)bx::alloc(g_allocator, group.m_numIndices * 2);
-						bx::memCopy(group.m_indices, mem->data, mem->size);
+						group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numIndices * sizeof(uint32_t));
+						const uint16_t* src = (const uint16_t*)mem->data;
+						for (uint32_t i = 0; i < group.m_numIndices; ++i)
+						{
+							group.m_indices[i] = (uint32_t)src[i];
+						}
 					}
 
 					group.m_ibh = createDynamicIndexBuffer(mem, MAX_BUFFER_NONE);
@@ -7613,8 +7627,12 @@ namespace max
 
 					if (_ramcopy)
 					{
-						group.m_indices = (uint16_t*)bx::alloc(g_allocator, group.m_numIndices * 2);
-						bx::memCopy(group.m_indices, mem->data, mem->size);
+						group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numIndices * sizeof(uint32_t));
+						const uint16_t* src = (const uint16_t*)mem->data;
+						for (uint32_t i = 0; i < group.m_numIndices; ++i)
+						{
+							group.m_indices[i] = (uint32_t)src[i];
+						}
 					}
 
 					group.m_ibh = createDynamicIndexBuffer(mem, MAX_BUFFER_NONE);
@@ -7702,13 +7720,13 @@ namespace max
 
 			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, _vertices->size);
 			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
-			group.m_indices = (uint16_t*)bx::alloc(g_allocator, _indices->size);
+			group.m_indices = (uint32_t*)bx::alloc(g_allocator, _indices->size);
 			bx::memCopy(group.m_indices, _indices->data, _indices->size);
 
 			group.m_numVertices = _vertices->size / stride;
-			group.m_numIndices = _indices->size / sizeof(uint16_t);
+			group.m_numIndices = _indices->size / sizeof(uint32_t);
 			group.m_vbh = max::createDynamicVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
-			group.m_ibh = max::createDynamicIndexBuffer(max::makeRef(group.m_indices, _indices->size));
+			group.m_ibh = max::createDynamicIndexBuffer(max::makeRef(group.m_indices, _indices->size), MAX_BUFFER_INDEX32);
 
 			mr.m_groups.push_back(group);
 

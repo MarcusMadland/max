@@ -2315,7 +2315,7 @@ namespace max
 			uint16_t m_numVertices;
 			uint8_t* m_vertices;
 			uint32_t m_numIndices;
-			uint16_t* m_indices;
+			uint32_t* m_indices;
 
 		};
 
@@ -2338,7 +2338,7 @@ namespace max
 			uint16_t m_numVertices;
 			uint8_t* m_vertices;
 			uint32_t m_numIndices;
-			uint16_t* m_indices;
+			uint32_t* m_indices;
 
 		};
 
