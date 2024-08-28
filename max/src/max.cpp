@@ -3414,7 +3414,6 @@ namespace max
 		// @todo Move elsewhere? 
 		m_entityQuery.alloc(MAX_CONFIG_MAX_ENTITIES);
 		m_meshQuery.alloc(MAX_CONFIG_MAX_MESH_GROUPS);
-		m_dynamicMeshQuery.alloc(MAX_CONFIG_MAX_MESH_GROUPS);
 
 		return true;
 	}
@@ -3424,7 +3423,6 @@ namespace max
 		// @todo Move elsewhere? 
 		m_entityQuery.free();
 		m_meshQuery.free();
-		m_dynamicMeshQuery.free();
 
 		s_dde.shutdown();
 		s_dds.shutdown();
@@ -3573,7 +3571,6 @@ namespace max
 			CHECK_HANDLE_LEAK        ("BodyHandle",				   m_bodyHandle												   );
 			CHECK_HANDLE_LEAK        ("OcclusionQueryHandle",      m_occlusionQueryHandle                                      );
 			CHECK_HANDLE_LEAK        ("MeshHandle",                m_meshHandle                                                );
-			CHECK_HANDLE_LEAK	     ("DynamicMeshHandle",         m_dynamicMeshHandle										   );
 			CHECK_HANDLE_LEAK        ("ComponentHandle",           m_componentHandle                                           );
 			CHECK_HANDLE_LEAK        ("EntityHandle",              m_entityHandle                                              );
 #undef CHECK_HANDLE_LEAK
@@ -3653,11 +3650,6 @@ namespace max
 		for (uint16_t ii = 0, num = _frame->m_freeMesh.getNumQueued(); ii < num; ++ii)
 		{
 			m_meshHandle.free(_frame->m_freeMesh.get(ii).idx);
-		}
-
-		for (uint16_t ii = 0, num = _frame->m_freeDynamicMesh.getNumQueued(); ii < num; ++ii)
-		{
-			m_dynamicMeshHandle.free(_frame->m_freeDynamicMesh.get(ii).idx);
 		}
 
 		for (uint16_t ii = 0, num = _frame->m_freeComponent.getNumQueued(); ii < num; ++ii)
@@ -5527,22 +5519,6 @@ namespace max
 		m_num = 0;
 	}
 
-	void DynamicMeshQuery::alloc(uint32_t _num)
-	{
-		m_data = (Data*)bx::alloc(g_allocator, sizeof(Data) * _num);
-		m_vertices = (DynamicVertexBufferHandle*)bx::alloc(g_allocator, sizeof(DynamicVertexBufferHandle) * _num);
-		m_indices = (DynamicIndexBufferHandle*)bx::alloc(g_allocator, sizeof(DynamicIndexBufferHandle) * _num);
-		m_num = 0;
-	}
-
-	void DynamicMeshQuery::free()
-	{
-		bx::free(g_allocator, m_data);
-		bx::free(g_allocator, m_vertices);
-		bx::free(g_allocator, m_indices);
-		m_num = 0;
-	}
-
 	void EntityQuery::alloc(uint32_t _num)
 	{
 		m_entities = (EntityHandle*)bx::alloc(g_allocator, sizeof(EntityHandle) * _num);
@@ -7266,43 +7242,6 @@ namespace max
 		s_ctx->destroyMesh(_handle);
 	}
 	
-	DynamicMeshHandle createDynamicMesh(const Memory* _mem, bool _ramcopy)
-	{
-		return s_ctx->createDynamicMesh(_mem, _ramcopy);
-	}
-	
-	DynamicMeshHandle createDynamicMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout)
-	{
-		return s_ctx->createDynamicMesh(_vertices, _indices, _layout);
-	}
-
-	DynamicMeshHandle loadDynamicMesh(const char* _filePath, bool _ramcopy)
-	{
-		const Memory* mem = loadMemory(_filePath);
-		DynamicMeshHandle handle = s_ctx->createDynamicMesh(mem, _ramcopy);
-		return handle;
-	}
-
-	DynamicMeshQuery* queryDynamicMesh(DynamicMeshHandle _handle)
-	{
-		return s_ctx->queryDynamicMesh(_handle);
-	}
-
-	const max::VertexLayout getLayout(DynamicMeshHandle _handle)
-	{
-		return s_ctx->getLayout(_handle);
-	}
-
-	void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices)
-	{
-		s_ctx->update(_mesh, _vertices, _indices);
-	}
-
-	void destroy(DynamicMeshHandle _handle)
-	{
-		s_ctx->destroyDynamicMesh(_handle);
-	}
-
 	ComponentHandle createComponent(void* _data, uint32_t _size)
 	{
 		return s_ctx->createComponent(_data, _size);

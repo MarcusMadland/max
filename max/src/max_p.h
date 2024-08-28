@@ -2350,7 +2350,7 @@ namespace max
 
 		VertexBufferHandle m_vbh;
 		IndexBufferHandle m_ibh;
-		uint16_t m_numVertices;
+		uint32_t m_numVertices;
 		uint8_t* m_vertices;
 		uint32_t m_numIndices;
 		uint32_t* m_indices;
@@ -2367,45 +2367,6 @@ namespace max
 		VertexLayout  m_layout;
 		GroupArray	  m_groups;
 		uint32_t	  m_refCount;
-	};
-
-	struct DynamicGroup
-	{
-		DynamicGroup()
-		{
-			reset();
-		}
-
-		void reset()
-		{
-			m_vbh.idx = kInvalidHandle;
-			m_ibh.idx = kInvalidHandle;
-			m_numVertices = 0;
-			m_vertices = NULL;
-			m_numIndices = 0;
-			m_indices = NULL;
-			m_prims.clear();
-		}
-
-		DynamicVertexBufferHandle m_vbh; 
-		DynamicIndexBufferHandle m_ibh;
-		uint16_t m_numVertices;
-		uint8_t* m_vertices;
-		uint32_t m_numIndices;
-		uint32_t* m_indices;
-		bx::Sphere m_sphere;
-		bx::Aabb   m_aabb;
-		bx::Obb    m_obb;
-		PrimitiveArray m_prims;
-	};
-	typedef stl::vector<DynamicGroup> DynamicGroupArray;
-
-	struct DynamicMeshRef
-	{
-		const Memory*	  m_data;
-		VertexLayout	  m_layout;
-		DynamicGroupArray m_groups;
-		uint32_t		  m_refCount;
 	};
 
 	struct EntityRef
@@ -2702,11 +2663,6 @@ namespace max
 			return m_freeMesh.queue(_handle);
 		}
 
-		bool free(DynamicMeshHandle _handle)
-		{
-			return m_freeDynamicMesh.queue(_handle);
-		}
-
 		bool free(ComponentHandle _handle)
 		{
 			return m_freeComponent.queue(_handle);
@@ -2728,7 +2684,6 @@ namespace max
 			m_freeFrameBuffer.reset();
 			m_freeUniform.reset();
 			m_freeMesh.reset();
-			m_freeDynamicMesh.reset();
 			m_freeComponent.reset();
 			m_freeEntity.reset();
 		}
@@ -2833,7 +2788,6 @@ namespace max
 		FreeHandle<FrameBufferHandle,  MAX_CONFIG_MAX_FRAME_BUFFERS>  m_freeFrameBuffer;
 		FreeHandle<UniformHandle,      MAX_CONFIG_MAX_UNIFORMS>       m_freeUniform;
 		FreeHandle<MeshHandle,		   MAX_CONFIG_MAX_MESHES>         m_freeMesh;
-		FreeHandle<DynamicMeshHandle,  MAX_CONFIG_MAX_DYNAMIC_MESHES> m_freeDynamicMesh;
 		FreeHandle<ComponentHandle,	   MAX_CONFIG_MAX_COMPONENTS>     m_freeComponent;
 		FreeHandle<EntityHandle,	   MAX_CONFIG_MAX_ENTITIES>       m_freeEntity;
 
@@ -7166,7 +7120,10 @@ namespace max
 
 					uint16_t stride = mr.m_layout.getStride();
 
-					bx::read(&reader, group.m_numVertices, &err);
+					uint16_t numVertices = 0;
+					bx::read(&reader, numVertices, &err);
+					group.m_numVertices = (uint32_t)numVertices;
+
 					const Memory* mem = alloc(group.m_numVertices * stride);
 					bx::read(&reader, mem->data, mem->size, &err);
 
@@ -7190,7 +7147,9 @@ namespace max
 
 					uint16_t stride = mr.m_layout.getStride();
 
-					bx::read(&reader, group.m_numVertices, &err);
+					uint16_t numVertices = 0;
+					bx::read(&reader, numVertices, &err);
+					group.m_numVertices = (uint32_t)numVertices;
 
 					const Memory* mem = alloc(group.m_numVertices * stride);
 
@@ -7344,13 +7303,13 @@ namespace max
 			uint16_t stride = _layout.getStride();
 
 			Group group;
-			group.m_numVertices = _vertices->size / stride;
+			group.m_numVertices = _vertices->size / (uint32_t)stride;
 			group.m_numIndices = _indices->size / sizeof(uint32_t);
 
-			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
+			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, _vertices->size);
 			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
 
-			group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
+			group.m_indices = (uint32_t*)bx::alloc(g_allocator, _indices->size);
 			bx::memCopy(group.m_indices, _indices->data, _indices->size);
 
 			group.m_vbh = max::createVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
@@ -7436,392 +7395,6 @@ namespace max
 
 			meshDecRef(_handle);
 		}
-
-		void dynamicMeshTakeOwnership(DynamicMeshHandle _handle)
-		{
-			dynamicMeshDecRef(_handle);
-		}
-
-		void dynamicMeshIncRef(DynamicMeshHandle _handle)
-		{
-			DynamicMeshRef& mr = m_dynamicMeshRef[_handle.idx];
-			++mr.m_refCount;
-		}
-
-		void dynamicMeshDecRef(DynamicMeshHandle _handle)
-		{
-			DynamicMeshRef& mr = m_dynamicMeshRef[_handle.idx];
-			int32_t refs = --mr.m_refCount;
-			if (0 == refs)
-			{
-				bool ok = m_submit->free(_handle); BX_UNUSED(ok);
-				BX_ASSERT(ok, "Mesh handle %d is already destroyed!", _handle.idx);
-
-				for (DynamicGroupArray::const_iterator it = mr.m_groups.begin(), itEnd = mr.m_groups.end(); it != itEnd; ++it)
-				{
-					const DynamicGroup& group = *it;
-
-					destroyDynamicVertexBuffer(group.m_vbh);
-
-					if (isValid(group.m_ibh))
-					{
-						destroyDynamicIndexBuffer(group.m_ibh);
-					}
-
-					if (NULL != group.m_vertices)
-					{
-						bx::free(g_allocator, group.m_vertices);
-					}
-
-					if (NULL != group.m_indices)
-					{
-						bx::free(g_allocator, group.m_indices);
-					}
-				}
-				mr.m_groups.clear();
-
-				m_dynamicMeshHashMap.removeByHandle(_handle.idx);
-			}
-		}
-
-		// @todo Rewrite mesh compiler to use uint32_t for indices instead of uint16_t.
-		MAX_API_FUNC(DynamicMeshHandle createDynamicMesh(const Memory* _mem, bool _ramcopy))
-		{
-			MAX_MUTEX_SCOPE(m_resourceApiLock);
-
-			bx::MemoryReader reader(_mem->data, _mem->size);
-
-			const uint32_t meshHash = bx::hash<bx::HashMurmur2A>(_mem->data, _mem->size);
-			const uint16_t idx = m_dynamicMeshHashMap.find(meshHash);
-			if (kInvalidHandle != idx)
-			{
-				DynamicMeshHandle handle = { idx };
-				dynamicMeshIncRef(handle);
-				release(_mem);
-				return handle;
-			}
-
-			DynamicMeshHandle handle = { m_dynamicMeshHandle.alloc() };
-
-			if (!isValid(handle))
-			{
-				BX_TRACE("Failed to allocate dynamic mesh handle.");
-				return MAX_INVALID_HANDLE;
-			}
-
-			bool ok = m_dynamicMeshHashMap.insert(meshHash, handle.idx);
-			BX_ASSERT(ok, "Dynamic mesh already exists!"); BX_UNUSED(ok);
-
-			DynamicMeshRef& mr = m_dynamicMeshRef[handle.idx];
-			mr.m_refCount = 1;
-			mr.m_data = _mem;
-
-			constexpr uint32_t kChunkVertexBuffer = BX_MAKEFOURCC('V', 'B', ' ', 0x1);
-			constexpr uint32_t kChunkVertexBufferCompressed = BX_MAKEFOURCC('V', 'B', 'C', 0x0);
-			constexpr uint32_t kChunkIndexBuffer = BX_MAKEFOURCC('I', 'B', ' ', 0x0);
-			constexpr uint32_t kChunkIndexBufferCompressed = BX_MAKEFOURCC('I', 'B', 'C', 0x1);
-			constexpr uint32_t kChunkPrimitive = BX_MAKEFOURCC('P', 'R', 'I', 0x0);
-
-			DynamicGroup group;
-
-			uint32_t chunk;
-			bx::Error err;
-			while (4 == bx::read(&reader, chunk, &err) && err.isOk())
-			{
-				switch (chunk)
-				{
-				case kChunkVertexBuffer:
-				{
-					bx::read(&reader, group.m_sphere, &err);
-					bx::read(&reader, group.m_aabb, &err);
-					bx::read(&reader, group.m_obb, &err);
-					read(&reader, mr.m_layout, &err);
-
-					uint16_t stride = mr.m_layout.getStride();
-
-					bx::read(&reader, group.m_numVertices, &err);
-					const Memory* mem = alloc(group.m_numVertices * stride);
-					bx::read(&reader, mem->data, mem->size, &err);
-
-					if (_ramcopy)
-					{
-						group.m_vertices = (uint8_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
-						bx::memCopy(group.m_vertices, mem->data, mem->size);
-					}
-
-					group.m_vbh = createDynamicVertexBuffer(mem, mr.m_layout, MAX_BUFFER_NONE);
-				}
-				break;
-
-				case kChunkVertexBufferCompressed:
-				{
-					bx::read(&reader, group.m_sphere, &err);
-					bx::read(&reader, group.m_aabb, &err);
-					bx::read(&reader, group.m_obb, &err);
-
-					read(&reader, mr.m_layout, &err);
-
-					uint16_t stride = mr.m_layout.getStride();
-
-					bx::read(&reader, group.m_numVertices, &err);
-
-					const Memory* mem = alloc(group.m_numVertices * stride);
-
-					uint32_t compressedSize;
-					bx::read(&reader, compressedSize, &err);
-
-					void* compressedVertices = bx::alloc(g_allocator, compressedSize);
-					bx::read(&reader, compressedVertices, compressedSize, &err);
-
-					meshopt_decodeVertexBuffer(mem->data, group.m_numVertices, stride, (uint8_t*)compressedVertices, compressedSize);
-
-					bx::free(g_allocator, compressedVertices);
-
-					if (_ramcopy)
-					{
-						group.m_vertices = (uint8_t*)bx::alloc(g_allocator, group.m_numVertices * stride);
-						bx::memCopy(group.m_vertices, mem->data, mem->size);
-					}
-
-					group.m_vbh = createDynamicVertexBuffer(mem, mr.m_layout, MAX_BUFFER_NONE);
-				}
-				break;
-
-				case kChunkIndexBuffer:
-				{
-					bx::read(&reader, group.m_numIndices, &err);
-
-					const Memory* mem = alloc(group.m_numIndices * 2);
-					bx::read(&reader, mem->data, mem->size, &err);
-
-					if (_ramcopy)
-					{
-						group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numIndices * sizeof(uint32_t));
-						const uint16_t* src = (const uint16_t*)mem->data;
-						for (uint32_t i = 0; i < group.m_numIndices; ++i)
-						{
-							group.m_indices[i] = (uint32_t)src[i];
-						}
-					}
-
-					group.m_ibh = createDynamicIndexBuffer(mem, MAX_BUFFER_NONE);
-				}
-				break;
-
-				case kChunkIndexBufferCompressed:
-				{
-					bx::read(&reader, group.m_numIndices, &err);
-
-					const Memory* mem = alloc(group.m_numIndices * 2);
-
-					uint32_t compressedSize;
-					bx::read(&reader, compressedSize, &err);
-
-					void* compressedIndices = bx::alloc(g_allocator, compressedSize);
-
-					bx::read(&reader, compressedIndices, compressedSize, &err);
-
-					meshopt_decodeIndexBuffer(mem->data, group.m_numIndices, 2, (uint8_t*)compressedIndices, compressedSize);
-
-					bx::free(g_allocator, compressedIndices);
-
-					if (_ramcopy)
-					{
-						group.m_indices = (uint32_t*)bx::alloc(g_allocator, group.m_numIndices * sizeof(uint32_t));
-						const uint16_t* src = (const uint16_t*)mem->data;
-						for (uint32_t i = 0; i < group.m_numIndices; ++i)
-						{
-							group.m_indices[i] = (uint32_t)src[i];
-						}
-					}
-
-					group.m_ibh = createDynamicIndexBuffer(mem, MAX_BUFFER_NONE);
-				}
-				break;
-
-				case kChunkPrimitive:
-				{
-					uint16_t len;
-					bx::read(&reader, len, &err);
-
-					stl::string material;
-					material.resize(len);
-					bx::read(&reader, const_cast<char*>(material.c_str()), len, &err);
-
-					uint16_t num;
-					bx::read(&reader, num, &err);
-
-					for (uint32_t ii = 0; ii < num; ++ii)
-					{
-						bx::read(&reader, len, &err);
-
-						stl::string name;
-						name.resize(len);
-						bx::read(&reader, const_cast<char*>(name.c_str()), len, &err);
-
-						Primitive prim;
-						bx::read(&reader, prim.m_startIndex, &err);
-						bx::read(&reader, prim.m_numIndices, &err);
-						bx::read(&reader, prim.m_startVertex, &err);
-						bx::read(&reader, prim.m_numVertices, &err);
-						bx::read(&reader, prim.m_sphere, &err);
-						bx::read(&reader, prim.m_aabb, &err);
-						bx::read(&reader, prim.m_obb, &err);
-
-						group.m_prims.push_back(prim);
-					}
-
-					mr.m_groups.push_back(group);
-					group.reset();
-				}
-				break;
-
-				default:
-					BX_TRACE("%08x at %d", chunk, bx::skip(&reader, 0));
-					break;
-				}
-			}
-
-			release(_mem);
-			return handle;
-		}
-
-		MAX_API_FUNC(DynamicMeshHandle createDynamicMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout))
-		{
-			MAX_MUTEX_SCOPE(m_resourceApiLock);
-
-			const uint32_t meshHash = bx::hash<bx::HashMurmur2A>(_vertices->data, _vertices->size);
-			const uint16_t idx = m_dynamicMeshHashMap.find(meshHash);
-			if (kInvalidHandle != idx)
-			{
-				DynamicMeshHandle handle = { idx };
-				dynamicMeshIncRef(handle);
-				return handle;
-			}
-
-			DynamicMeshHandle handle = { m_dynamicMeshHandle.alloc() };
-
-			if (!isValid(handle))
-			{
-				BX_TRACE("Failed to allocate dynamic mesh handle.");
-				return MAX_INVALID_HANDLE;
-			}
-
-			bool ok = m_dynamicMeshHashMap.insert(meshHash, handle.idx);
-			BX_ASSERT(ok, "Dynamic mesh already exists!"); BX_UNUSED(ok);
-
-			DynamicMeshRef& mr = m_dynamicMeshRef[handle.idx];
-			mr.m_refCount = 1;
-			mr.m_layout = _layout;
-
-			uint32_t stride = _layout.getStride();
-
-			DynamicGroup group;
-
-			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, _vertices->size);
-			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
-			group.m_indices = (uint32_t*)bx::alloc(g_allocator, _indices->size);
-			bx::memCopy(group.m_indices, _indices->data, _indices->size);
-
-			group.m_numVertices = _vertices->size / stride;
-			group.m_numIndices = _indices->size / sizeof(uint32_t);
-			group.m_vbh = max::createDynamicVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
-			group.m_ibh = max::createDynamicIndexBuffer(max::makeRef(group.m_indices, _indices->size), MAX_BUFFER_INDEX32);
-
-			mr.m_groups.push_back(group);
-
-			return handle;
-		}
-
-		MAX_API_FUNC(DynamicMeshQuery* queryDynamicMesh(DynamicMeshHandle _handle))
-		{
-			MAX_MUTEX_SCOPE(m_resourceApiLock);
-
-			MAX_CHECK_HANDLE("queryDynamicMesh", m_dynamicMeshHandle, _handle);
-
-			DynamicMeshRef& mr = m_dynamicMeshRef[_handle.idx];
-
-			m_dynamicMeshQuery.m_num = (uint32_t)mr.m_groups.size();
-			BX_ASSERT(m_dynamicMeshQuery.m_num <= MAX_CONFIG_MAX_MESH_GROUPS, "Dynamic mesh has more groups than allowed.");
-
-			stl::vector<DynamicVertexBufferHandle> vb;
-			stl::vector<DynamicIndexBufferHandle> ib;
-			stl::vector<DynamicMeshQuery::Data> data;
-
-			for (uint32_t ii = 0; ii < m_dynamicMeshQuery.m_num; ++ii)
-			{
-				DynamicGroup& group = mr.m_groups[ii];
-
-				vb.push_back(group.m_vbh);
-				ib.push_back(group.m_ibh);
-
-				DynamicMeshQuery::Data groupData;
-				groupData.m_numVertices = group.m_numVertices;
-				groupData.m_numIndices = group.m_numIndices;
-				groupData.m_vertices = group.m_vertices;
-				groupData.m_indices = group.m_indices;
-				data.push_back(groupData);
-			}
-
-			bx::memCopy(
-				m_dynamicMeshQuery.m_vertices,
-				vb.data(),
-				(sizeof(DynamicVertexBufferHandle)) * m_dynamicMeshQuery.m_num
-			);
-
-			bx::memCopy(
-				m_dynamicMeshQuery.m_indices,
-				ib.data(),
-				(sizeof(DynamicIndexBufferHandle)) * m_dynamicMeshQuery.m_num
-			);
-
-			bx::memCopy(
-				m_dynamicMeshQuery.m_data,
-				data.data(),
-				(sizeof(DynamicMeshQuery::Data)) * m_dynamicMeshQuery.m_num
-			);
-
-			return &m_dynamicMeshQuery;
-		}
-
-		MAX_API_FUNC(const max::VertexLayout getLayout(DynamicMeshHandle _handle))
-		{
-			MAX_MUTEX_SCOPE(m_resourceApiLock);
-
-			MAX_CHECK_HANDLE("getLayout", m_dynamicMeshHandle, _handle);
-
-			DynamicMeshRef& mr = m_dynamicMeshRef[_handle.idx];
-			return mr.m_layout;
-		}
-
-		MAX_API_FUNC(void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices))
-		{
-			MAX_MUTEX_SCOPE(m_resourceApiLock);
-
-			DynamicMeshRef& mr = m_dynamicMeshRef[_mesh.idx];
-			for (uint32_t ii = 0; ii < mr.m_groups.size(); ++ii)
-			{
-				DynamicGroup& group = mr.m_groups[ii];
-				update(group.m_vbh, 0, _vertices);
-				update(group.m_ibh, 0, _indices);
-			}
-		}
-
-		MAX_API_FUNC(void destroyDynamicMesh(DynamicMeshHandle _handle))
-		{
-			MAX_MUTEX_SCOPE(m_resourceApiLock);
-
-			MAX_CHECK_HANDLE("destroyDynamicMesh", m_dynamicMeshHandle, _handle);
-
-			if (!isValid(_handle))
-			{
-				BX_WARN(false, "Passing invalid dynamic mesh handle to max::destroyDynamicMesh.");
-				return;
-			}
-
-			dynamicMeshDecRef(_handle);
-		}
-
 
 		void componentTakeOwnership(ComponentHandle _handle)
 		{
@@ -8614,7 +8187,6 @@ namespace max
 		bx::HandleAllocT<MAX_CONFIG_MAX_FRAME_BUFFERS> m_frameBufferHandle;
 		bx::HandleAllocT<MAX_CONFIG_MAX_UNIFORMS> m_uniformHandle;
 		bx::HandleAllocT<MAX_CONFIG_MAX_MESHES> m_meshHandle;
-		bx::HandleAllocT<MAX_CONFIG_MAX_DYNAMIC_MESHES> m_dynamicMeshHandle;
 		bx::HandleAllocT<MAX_CONFIG_MAX_COMPONENTS> m_componentHandle;
 		bx::HandleAllocT<MAX_CONFIG_MAX_ENTITIES> m_entityHandle;
 		bx::HandleAllocT<MAX_CONFIG_MAX_BODIES> m_bodyHandle;
@@ -8636,10 +8208,6 @@ namespace max
 		MeshHashMap m_meshHashMap;
 		MeshRef		m_meshRef[MAX_CONFIG_MAX_MESHES];
 
-		typedef bx::HandleHashMapT<MAX_CONFIG_MAX_DYNAMIC_MESHES * 2> DynamicMeshHashMap;
-		DynamicMeshHashMap m_dynamicMeshHashMap;
-		DynamicMeshRef	   m_dynamicMeshRef[MAX_CONFIG_MAX_DYNAMIC_MESHES];
-
 		TextureRef      m_textureRef[MAX_CONFIG_MAX_TEXTURES];
 		FrameBufferRef  m_frameBufferRef[MAX_CONFIG_MAX_FRAME_BUFFERS];
 		EntityRef	    m_entityRef[MAX_CONFIG_MAX_ENTITIES];
@@ -8647,7 +8215,6 @@ namespace max
 		VertexLayoutRef m_vertexLayoutRef;
 
 		MeshQuery m_meshQuery;
-		DynamicMeshQuery m_dynamicMeshQuery;
 		EntityQuery m_entityQuery;
 
 		ViewId m_viewRemap[MAX_CONFIG_MAX_VIEWS];

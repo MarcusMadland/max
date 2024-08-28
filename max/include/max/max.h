@@ -723,7 +723,6 @@ namespace max
 	MAX_HANDLE(WindowHandle)
 	MAX_HANDLE(GamepadHandle)
 	MAX_HANDLE(MeshHandle)
-	MAX_HANDLE(DynamicMeshHandle)
 	MAX_HANDLE(ComponentHandle)
 	MAX_HANDLE(EntityHandle)
 	MAX_HANDLE(BodyHandle)
@@ -2312,7 +2311,7 @@ namespace max
 
 		struct Data
 		{
-			uint16_t m_numVertices;
+			uint32_t m_numVertices;
 			uint8_t* m_vertices;
 			uint32_t m_numIndices;
 			uint32_t* m_indices;
@@ -2323,29 +2322,6 @@ namespace max
 		VertexBufferHandle* m_vertices;
 		IndexBufferHandle* m_indices;
 		
-		uint32_t m_num;
-	};
-
-	/// Dynamic mesh query.
-	///
-	struct DynamicMeshQuery
-	{
-		void alloc(uint32_t _num);
-		void free();
-
-		struct Data
-		{
-			uint16_t m_numVertices;
-			uint8_t* m_vertices;
-			uint32_t m_numIndices;
-			uint32_t* m_indices;
-
-		};
-
-		Data* m_data;
-		DynamicVertexBufferHandle* m_vertices;
-		DynamicIndexBufferHandle* m_indices;
-
 		uint32_t m_num;
 	};
 
@@ -4161,55 +4137,6 @@ namespace max
 	/// @param[in] _handle Handle to mesh object.
 	///
 	void destroy(MeshHandle _handle);
-
-	/// Create dynamic mesh from memory buffer.
-	///
-	/// @returns Dynamic mesh handle.
-	///
-	/// @remarks
-	///   Mesh binary is obtained by compiling mesh offline with geometryc command line tool.
-	///
-	DynamicMeshHandle createDynamicMesh(const Memory* _mem, bool _ramcopy = false);
-
-	/// Create dynamic mesh from vertices and indices buffers.
-	///
-	/// @param[in] _vertices Vertex buffer data.
-	/// @param[in] _indices Index buffer data.
-	/// @param[in] _layout Vertex layout.
-	/// @returns Mesh handle.
-	///
-	DynamicMeshHandle createDynamicMesh(const Memory* _vertices, const Memory* _indices, const VertexLayout& _layout);
-
-	/// Create dynamic mesh from path.
-	///
-	/// @param[in] _filePath Path of the geometry binary.
-	/// @param[in] _ramcopy Should copy the memory.
-	/// @returns Dynamic mesh handle.
-	///
-	/// @remarks
-	///   Mesh binary is obtained by compiling mesh offline with geometryc command line tool.
-	///
-	DynamicMeshHandle loadDynamicMesh(const char* _filePath, bool _ramcopy = false);
-
-	/// 
-	DynamicMeshQuery* queryDynamicMesh(DynamicMeshHandle _handle);
-
-	/// 
-	const max::VertexLayout getLayout(DynamicMeshHandle _handle);
-
-	/// Update dynamic mesh.
-	///
-	/// @param[in] _handle Dynamic mesh handle.
-	/// @param[in] _vertices Vertex buffer data.
-	/// @param[in] _indices Index buffer data.
-	///
-	void update(DynamicMeshHandle _mesh, const Memory* _vertices, const Memory* _indices);
-
-	/// Destroy dynamic mesh.
-	///
-	/// @param[in] _handle Handle to dynamic mesh object.
-	///
-	void destroy(DynamicMeshHandle _handle);
 
 	/// Create component from data.
 	///
