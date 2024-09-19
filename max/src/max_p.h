@@ -7314,6 +7314,9 @@ namespace max
 
 			group.m_vbh = max::createVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
 			group.m_ibh = max::createIndexBuffer(max::makeRef(group.m_indices, _indices->size), MAX_BUFFER_INDEX32);
+
+			release(_vertices);
+			release(_indices);
 			
 			mr.m_groups.push_back(group);
 

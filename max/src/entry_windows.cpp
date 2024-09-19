@@ -550,8 +550,12 @@ namespace max
 				case WM_USER_WINDOW_CREATE:
 					{
 						Msg* msg = (Msg*)_lparam;
+						max::WSTRING title = UTF8ToUTF16(msg->m_title.c_str());
+						title.pop_back();
+						title.push_back(0x2122);
+						title.push_back('\n');
 						HWND hwnd = CreateWindowW(L"max"
-							, UTF8ToUTF16(msg->m_title.c_str()).data()
+							, title.data()
 							, WS_OVERLAPPEDWINDOW|WS_VISIBLE
 							, msg->m_x
 							, msg->m_y
@@ -594,7 +598,11 @@ namespace max
 				case WM_USER_WINDOW_SET_TITLE:
 					{
 						Msg* msg = (Msg*)_lparam;
-						SetWindowTextW(m_hwnd[_wparam], UTF8ToUTF16(msg->m_title.c_str()).data() );
+						max::WSTRING title = UTF8ToUTF16(msg->m_title.c_str());
+						title.pop_back();
+						title.push_back(0x2122);
+						title.push_back('\n');
+						SetWindowTextW(m_hwnd[_wparam], title.data() );
 						delete msg;
 					}
 					break;
