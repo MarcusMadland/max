@@ -460,16 +460,36 @@ namespace max
 
 			HINSTANCE instance = (HINSTANCE)GetModuleHandle(NULL);
 
+			// @todo This icon shit is some hardcoded mess, create 'setWindowIcon()' func with some image resource from bimg::
+
+			// Load the large icon (32x32) from an external .ico file
+			HICON hIconLarge = (HICON)LoadImage(
+				NULL,               
+				"textures/icon_large.ico",
+				IMAGE_ICON,         
+				32, 32,             
+				LR_LOADFROMFILE     
+			);
+
+			// Load the small icon (16x16) from the same external .ico file
+			HICON hIconSmall = (HICON)LoadImage(
+				NULL,               
+				"textures/icon_small.ico",
+				IMAGE_ICON,         
+				16, 16,             
+				LR_LOADFROMFILE     
+			);
+
 			WNDCLASSEXW wnd;
 			bx::memSet(&wnd, 0, sizeof(wnd) );
 			wnd.cbSize = sizeof(wnd);
 			wnd.style = CS_HREDRAW | CS_VREDRAW;
 			wnd.lpfnWndProc = wndProc;
 			wnd.hInstance = instance;
-			wnd.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+			wnd.hIcon = hIconLarge;
+			wnd.hIconSm = hIconSmall;
 			wnd.hCursor = LoadCursor(NULL, IDC_ARROW);
 			wnd.lpszClassName = L"max";
-			wnd.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 			RegisterClassExW(&wnd);
 
 			m_windowAlloc.alloc();

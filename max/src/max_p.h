@@ -7306,17 +7306,17 @@ namespace max
 			group.m_numVertices = _vertices->size / (uint32_t)stride;
 			group.m_numIndices = _indices->size / sizeof(uint32_t);
 
-			group.m_vertices = (uint8_t*)bx::alloc(g_allocator, _vertices->size);
-			bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
+			//group.m_vertices = (uint8_t*)bx::alloc(g_allocator, _vertices->size);
+			//bx::memCopy(group.m_vertices, _vertices->data, _vertices->size);
+			//
+			//group.m_indices = (uint32_t*)bx::alloc(g_allocator, _indices->size);
+			//bx::memCopy(group.m_indices, _indices->data, _indices->size);
 
-			group.m_indices = (uint32_t*)bx::alloc(g_allocator, _indices->size);
-			bx::memCopy(group.m_indices, _indices->data, _indices->size);
+			group.m_vbh = max::createVertexBuffer(_vertices, _layout);
+			group.m_ibh = max::createIndexBuffer(_indices, MAX_BUFFER_INDEX32);
 
-			group.m_vbh = max::createVertexBuffer(max::makeRef(group.m_vertices, _vertices->size), _layout);
-			group.m_ibh = max::createIndexBuffer(max::makeRef(group.m_indices, _indices->size), MAX_BUFFER_INDEX32);
-
-			release(_vertices);
-			release(_indices);
+			//release(_vertices);
+			//release(_indices);
 			
 			mr.m_groups.push_back(group);
 

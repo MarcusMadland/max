@@ -537,7 +537,6 @@
 #define MAX_CUBE_MAP_POSITIVE_Z                  UINT8_C(0x04) //!< Cubemap +z.
 #define MAX_CUBE_MAP_NEGATIVE_Z                  UINT8_C(0x05) //!< Cubemap -z.
 
-
 /// Blend function separate.
 #define MAX_STATE_BLEND_FUNC_SEPARATE(_srcRGB, _dstRGB, _srcA, _dstA) (UINT64_C(0) \
 	| ( ( (uint64_t)(_srcRGB)|( (uint64_t)(_dstRGB)<<4) )   )                       \

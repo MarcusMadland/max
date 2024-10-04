@@ -55,7 +55,8 @@ function(add_shader FILE FOLDER)
 		# essl
 		if(NOT "${TYPE}" STREQUAL "COMPUTE")
 			set(ESSL_OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/shaders/essl/${FILENAME}.bin)
-			_max_shaderc_parse(ESSL ${COMMON} ANDROID PROFILE 100_es OUTPUT ${ESSL_OUTPUT})
+			#_max_shaderc_parse(ESSL ${COMMON} ANDROID PROFILE 100_es OUTPUT ${ESSL_OUTPUT})
+			_max_shaderc_parse(ESSL ${COMMON} ANDROID PROFILE 300_es OUTPUT ${ESSL_OUTPUT}) # Changed version to support 'texelFetch'
 			list(APPEND OUTPUTS "ESSL")
 			set(OUTPUTS_PRETTY "${OUTPUTS_PRETTY}ESSL, ")
 		endif()
